@@ -21,6 +21,12 @@
 	@internal path /index.html /pages/*
 	route {
 		error @internal 404
+		handle /legal.json {
+			root * /etc/emberbox
+			header Cache-Control "no-cache"
+			header X-Robots-Tag "noindex"
+			file_server
+		}
 		try_files /pages{path}/index.html {path}
 		file_server
 	}

@@ -1,0 +1,8 @@
+{
+  "provider": {
+    "name": "Vorname Nachname",
+    "address": ["Straße 1", "12345 Ort"],
+    "email": "kontakt@example.org"
+  },
+  "logRetentionDays": 14
+}

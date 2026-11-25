@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import {usePage} from '@emberbox/ui'
-import {PROVIDER} from '../legal'
+import ProviderDetails from '../components/ProviderDetails.vue'
+import {useLegalDetails} from '../legal'
 
 usePage({
   title: 'Impressum – Emberbox',
   description: 'Anbieterkennzeichnung von emberbox.app und den Emberbox-Werkzeugen.',
   path: '/impressum',
 })
+
+const {details, state} = useLegalDetails()
 </script>
 
 <template>
@@ -14,12 +17,7 @@ usePage({
     <h1 class="headline text-4xl">Impressum</h1>
     <section class="flex flex-col gap-1">
       <h2 class="field-label">Angaben gemäß § 18 Abs. 1 MStV</h2>
-      <p class="m-0">{{ PROVIDER.name }}</p>
-      <p v-for="line in PROVIDER.address" :key="line" class="m-0">{{ line }}</p>
-    </section>
-    <section class="flex flex-col gap-1">
-      <h2 class="field-label">Kontakt</h2>
-      <p class="m-0">E-Mail: {{ PROVIDER.email }}</p>
+      <ProviderDetails :details="details" :state="state"/>
     </section>
     <section class="flex flex-col gap-2 text-muted">
       <p class="m-0">
