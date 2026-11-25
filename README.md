@@ -1,28 +1,28 @@
 # Emberbox
 
-Werkzeuge für Ausbildung und Übung in der Feuerwehr, unter einem Dach auf
-[emberbox.app](https://emberbox.app).
+Tools for fire brigade training and exercises, under one roof at
+[emberbox.app](https://emberbox.app). The tools themselves are in German.
 
-Dieses Repository enthält:
+This repository contains:
 
-- **`packages/ui`** – `@emberbox/ui`, der gemeinsame Stil der Emberbox-Werkzeuge. Baut auf
-  [Nuxt UI](https://ui.nuxt.com) auf und bringt dessen Komponenten im Emberbox-Stil mit.
-- **`hub`** – die Startseite emberbox.app.
+- **`packages/ui`** – `@emberbox/ui`, the shared look of the Emberbox tools. Built on
+  [Nuxt UI](https://ui.nuxt.com), it brings Nuxt UI's components in the Emberbox style.
+- **`hub`** – the emberbox.app start page.
 
-## Entwicklung
+## Development
 
-Voraussetzung ist [Nix](https://nixos.org) mit direnv; `shell.nix` liefert Node.
+Requires [Nix](https://nixos.org) with direnv; `shell.nix` provides Node.
 
 ```sh
 ./toolchain.sh install
-./toolchain.sh hub-dev      # Musterseite unter http://localhost:5173/muster
-./toolchain.sh verify       # alles, was die CI prüft
+./toolchain.sh hub-dev      # pattern page at http://localhost:5173/muster
+./toolchain.sh verify       # everything CI checks
 ```
 
-## `@emberbox/ui` in einem Werkzeug
+## Using `@emberbox/ui` in a tool
 
 ```ts
-// vite.config.ts – ersetzt @tailwindcss/vite
+// vite.config.ts – replaces @tailwindcss/vite
 import vue from '@vitejs/plugin-vue'
 import {emberbox} from '@emberbox/ui/vite'
 import {defineConfig} from 'vite'
@@ -31,7 +31,7 @@ export default defineConfig({plugins: [vue(), emberbox()]})
 ```
 
 ```css
-/* stil.css – bringt Tailwind und Nuxt UI mit */
+/* stil.css – brings Tailwind and Nuxt UI along */
 @import "@emberbox/ui/stil.css";
 ```
 
@@ -58,12 +58,12 @@ import {AppFuss, AppKopf, EmberboxApp} from '@emberbox/ui'
 </template>
 ```
 
-`EmberboxApp` stellt Nuxt UI auf Deutsch und zeigt ein Band, sobald ein neuerer Build ausgeliefert
-wird. Werkzeuge ohne vue-router nutzen `emberbox({router: false})`.
+`EmberboxApp` sets Nuxt UI to German and shows a banner as soon as a newer build is served. Tools
+without vue-router use `emberbox({router: false})`.
 
-Commit und Bauzeit stehen als `fassung` aus `@emberbox/ui` bereit und erscheinen im Fuß.
-`emberbox()` liest sie aus `git` oder, im Image-Build ohne `.git`, aus den Umgebungsvariablen
-`COMMIT` und `GEBAUT`:
+The commit and build time are available as `fassung` from `@emberbox/ui` and appear in the footer.
+`emberbox()` reads them from `git` or, in an image build without `.git`, from the environment
+variables `COMMIT` and `GEBAUT`:
 
 ```dockerfile
 ARG COMMIT=dev
@@ -71,13 +71,13 @@ ARG GEBAUT
 RUN COMMIT=$COMMIT GEBAUT=$GEBAUT npm run build
 ```
 
-Neben jedem Build liegt `fassung.json`. Das Backend liefert sie im Wurzelverzeichnis aus, ohne
-Caching (`Cache-Control: no-store`), damit offene Seiten einen neuen Build bemerken.
+Every build contains `fassung.json`. The backend serves it at the root without caching
+(`Cache-Control: no-store`), so open pages notice a new build.
 
-Weitere Bausteine: `CodeAnzeige`, `useRueckfrage`, `usePolling` und die Hilfe-Komponenten
-`HilfeSeite`, `HilfeAbschnitt`, `HilfeThema`, `HilfeMockup`. Die Musterseite zeigt sie alle.
+Further building blocks: `CodeAnzeige`, `useRueckfrage`, `usePolling` and the help components
+`HilfeSeite`, `HilfeAbschnitt`, `HilfeThema`, `HilfeMockup`. The pattern page shows all of them.
 
-## Logo, SEO und Vorrendern
+## Logo, SEO and prerendering
 
 ```ts
 // vite.config.ts
@@ -88,14 +88,16 @@ emberbox({
 })
 ```
 
-- `logo` legt `favicon.svg`, `apple-touch-icon.png` und `logo-512.png` ins Wurzelverzeichnis und
-  verlinkt sie. `AppKopf` zeigt es mit `logo="/favicon.svg"`.
-- `useSeite({titel, beschreibung, pfad, indexieren, bild, daten})` setzt Titel, Beschreibung,
-  canonical, OpenGraph und `robots` einer Seite; `werkzeugDaten(...)` liefert JSON-LD dazu.
-- `vorrendern` rendert die öffentlichen Seiten beim Bauen nach `dist/seiten/<pfad>/index.html`
-  und schreibt `sitemap.xml` und `robots.txt`. `dist/index.html` bleibt die leere Hülle für alle
-  übrigen Routen. Das Backend liefert für `/` `seiten/index.html` aus, für `/hilfe`
-  `seiten/hilfe/index.html`, sonst `index.html`.
+- `logo` puts `favicon.svg`, `apple-touch-icon.png` and `logo-512.png` at the root and links them;
+  `logo-512.png` is also the default preview image. `AppKopf` shows the logo with
+  `logo="/favicon.svg"`.
+- `useSeite({titel, beschreibung, pfad, indexieren, bild, daten})` sets a page's title,
+  description, canonical URL, OpenGraph and `robots`; `werkzeugDaten(...)` provides matching
+  JSON-LD.
+- `vorrendern` renders the public pages at build time to `dist/seiten/<path>/index.html` and
+  writes `sitemap.xml` and `robots.txt`. `dist/index.html` stays the empty shell for all other
+  routes. The backend serves `seiten/index.html` for `/`, `seiten/hilfe/index.html` for `/hilfe`,
+  and `index.html` otherwise.
 
 ```ts
 // src/vorrendern.ts
@@ -110,46 +112,45 @@ export async function render(pfad: string, vorlage: string): Promise<string> {
 }
 ```
 
-Im Browser erzeugt `appErzeugen(App)` die App so, dass sie vorgerendertes HTML übernimmt; vor
-`mount` wartet sie auf `router.isReady()`. Die vorgerenderten Seiten dürfen beim Aufbau nicht auf
-`window` oder `document` zugreifen, nur in `onMounted`. Ein vollständiges Beispiel liegt in
-`probe/`.
+In the browser, `appErzeugen(App)` creates the app so that it takes over prerendered HTML; wait for
+`router.isReady()` before `mount`. Prerendered pages must not touch `window` or `document` during
+setup, only in `onMounted`. `probe/` holds a complete example.
 
-Primäre Knöpfe sind tintenschwarz, Rot gibt es als Farbe `signal` und für Fehler (`error`).
-Icons kommen aus Lucide (`i-lucide-*`) und werden beim Bauen gebündelt.
+Primary buttons are ink black; red is available as the colour `signal` and for errors (`error`).
+Icons come from Lucide (`i-lucide-*`) and are bundled at build time; nothing is fetched from the
+Iconify API.
 
-Zum lokalen Ausprobieren in einem Werkzeug wird die Lib als Paket gepackt, damit ihre
-Abhängigkeiten im Werkzeug landen:
+To try the library in a tool locally, pack it so its dependencies are installed in the tool:
 
 ```sh
 ./toolchain.sh ui-build
-npm pack -w @emberbox/ui            # erzeugt emberbox-ui-<version>.tgz
-cd ../werkzeug/frontend && npm install ../../emberbox/emberbox-ui-<version>.tgz
+npm pack -w @emberbox/ui            # creates emberbox-ui-<version>.tgz
+cd ../tool/frontend && npm install ../../emberbox/emberbox-ui-<version>.tgz
 ```
 
 ## Hub
 
-Der Hub unter `hub/` ist komplett vorgerendert und läuft als statische Seite in einem
-Caddy-Container. Die Werkzeuge stehen in `hub/src/werkzeuge.ts`; ein neues Werkzeug ist dort ein
-Eintrag mehr. Impressum und Datenschutz gelten für alle Werkzeuge, die Angaben zum Anbieter stehen
-in `hub/src/rechtliches.ts`.
+The hub in `hub/` is fully prerendered and runs as a static site in a Caddy container behind
+Traefik. The tools are listed in `hub/src/werkzeuge.ts`; a new tool is one more entry there. The
+imprint and privacy policy cover all tools; the provider details live in
+`hub/src/rechtliches.ts`.
 
 ```sh
-./toolchain.sh hub-image                       # Image lokal bauen
-docker run --rm -p 8080:80 emberbox-hub:lokal   # unter http://localhost:8080 ansehen
+./toolchain.sh hub-image                       # build the image locally
+docker run --rm -p 8080:80 emberbox-hub:lokal   # view at http://localhost:8080
 ```
 
-Auf `main` baut die CI das Image `ghcr.io/rainbowdashlabs/emberbox-hub`. `hub/compose.yml` startet
-es hinter Traefik unter `emberbox.app`.
+On `main`, CI builds the image `ghcr.io/rainbowdashlabs/emberbox-hub`. `hub/compose.yml` runs it
+behind Traefik at `emberbox.app`.
 
-## Veröffentlichen
+## Publishing
 
-`@emberbox/ui` erscheint auf npmjs, sobald ein Tag `ui-vX.Y.Z` auf `main` gepusht wird, das zur
-Version in `packages/ui/package.json` passt. Der Workflow braucht das Secret `NPM_TOKEN`.
+`@emberbox/ui` is published to npmjs when a tag `ui-vX.Y.Z` matching the version in
+`packages/ui/package.json` is pushed on `main`. The workflow needs the secret `NPM_TOKEN`.
 
-Die Piktogramme der Logos stammen aus [Lucide](https://lucide.dev) (ISC);
-`./toolchain.sh ui-logos` erzeugt sie neu.
+The logo pictograms come from [Lucide](https://lucide.dev) (ISC); `./toolchain.sh ui-logos`
+regenerates them.
 
-## Lizenz
+## License
 
 MIT
