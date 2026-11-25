@@ -31,9 +31,7 @@ export default defineConfig({plugins: [vue(), emberbox()]})
 ```
 
 ```css
-/* stil.css */
-@import "tailwindcss";
-@import "@nuxt/ui";
+/* stil.css – bringt Tailwind und Nuxt UI mit */
 @import "@emberbox/ui/stil.css";
 ```
 
@@ -79,6 +77,44 @@ Caching (`Cache-Control: no-store`), damit offene Seiten einen neuen Build bemer
 Weitere Bausteine: `CodeAnzeige`, `useRueckfrage`, `usePolling` und die Hilfe-Komponenten
 `HilfeSeite`, `HilfeAbschnitt`, `HilfeThema`, `HilfeMockup`. Die Musterseite zeigt sie alle.
 
+## Logo, SEO und Vorrendern
+
+```ts
+// vite.config.ts
+emberbox({
+    adresse: 'https://calltaker.emberbox.app',
+    logo: 'calltaker',
+    vorrendern: {eintrag: 'src/vorrendern.ts', pfade: ['/', '/hilfe']},
+})
+```
+
+- `logo` legt `favicon.svg`, `apple-touch-icon.png` und `logo-512.png` ins Wurzelverzeichnis und
+  verlinkt sie. `AppKopf` zeigt es mit `logo="/favicon.svg"`.
+- `useSeite({titel, beschreibung, pfad, indexieren, bild, daten})` setzt Titel, Beschreibung,
+  canonical, OpenGraph und `robots` einer Seite; `werkzeugDaten(...)` liefert JSON-LD dazu.
+- `vorrendern` rendert die öffentlichen Seiten beim Bauen nach `dist/seiten/<pfad>/index.html`
+  und schreibt `sitemap.xml` und `robots.txt`. `dist/index.html` bleibt die leere Hülle für alle
+  übrigen Routen. Das Backend liefert für `/` `seiten/index.html` aus, für `/hilfe`
+  `seiten/hilfe/index.html`, sonst `index.html`.
+
+```ts
+// src/vorrendern.ts
+import {seiteRendern} from '@emberbox/ui/vorrendern'
+
+export async function render(pfad: string, vorlage: string): Promise<string> {
+    const router = routerErzeugen(createMemoryHistory())
+    const app = createSSRApp(App).use(router)
+    await router.push(pfad)
+    await router.isReady()
+    return seiteRendern(app, vorlage)
+}
+```
+
+Im Browser erzeugt `appErzeugen(App)` die App so, dass sie vorgerendertes HTML übernimmt; vor
+`mount` wartet sie auf `router.isReady()`. Die vorgerenderten Seiten dürfen beim Aufbau nicht auf
+`window` oder `document` zugreifen, nur in `onMounted`. Ein vollständiges Beispiel liegt in
+`probe/`.
+
 Primäre Knöpfe sind tintenschwarz, Rot gibt es als Farbe `signal` und für Fehler (`error`).
 Icons kommen aus Lucide (`i-lucide-*`) und werden beim Bauen gebündelt.
 
@@ -90,6 +126,14 @@ Abhängigkeiten im Werkzeug landen:
 npm pack -w @emberbox/ui            # erzeugt emberbox-ui-<version>.tgz
 cd ../werkzeug/frontend && npm install ../../emberbox/emberbox-ui-<version>.tgz
 ```
+
+## Veröffentlichen
+
+`@emberbox/ui` erscheint auf npmjs, sobald ein Tag `ui-vX.Y.Z` auf `main` gepusht wird, das zur
+Version in `packages/ui/package.json` passt. Der Workflow braucht das Secret `NPM_TOKEN`.
+
+Die Piktogramme der Logos stammen aus [Lucide](https://lucide.dev) (ISC);
+`./toolchain.sh ui-logos` erzeugt sie neu.
 
 ## Lizenz
 

@@ -3,6 +3,11 @@ import type {NuxtUIOptions} from '@nuxt/ui/unplugin'
 import {defu} from 'defu'
 import {execSync} from 'node:child_process'
 import type {PluginOption} from 'vite'
+import {type Logo, logoPlugin} from './vite/logo.js'
+import {vorrenderPlugin, type VorrendernOptionen} from './vite/vorrendern.js'
+
+export {SEITEN_VERZEICHNIS, type VorrendernOptionen} from './vite/vorrendern.js'
+export type {Logo} from './vite/logo.js'
 
 /** Einstellungen, mit denen ein Werkzeug `emberbox()` an seine Lage anpasst. */
 export interface EmberboxOptionen {
@@ -10,6 +15,12 @@ export interface EmberboxOptionen {
     router?: boolean
     /** Zusätzliche Nuxt-UI-Einstellungen des Werkzeugs, die über die Emberbox-Vorgaben gelegt werden. */
     ui?: NuxtUIOptions['ui']
+    /** Die öffentliche Adresse, etwa `https://calltaker.emberbox.app`; ein `/` am Ende fällt weg. */
+    adresse?: string
+    /** Welches Emberbox-Logo als Favicon, Touch-Icon und Vorschaubild ausgeliefert wird. */
+    logo?: Logo
+    /** Welche öffentlichen Seiten beim Bauen vorgerendert werden; braucht `adresse`. */
+    vorrendern?: VorrendernOptionen
 }
 
 const FARBEN = ['primary', 'signal', 'success', 'info', 'warning', 'error']
@@ -94,6 +105,10 @@ const FASSUNG = {commit: commit(), gebaut: process.env.GEBAUT || new Date().toIS
  * neueren Build erkennen.
  */
 export function emberbox(optionen: EmberboxOptionen = {}): PluginOption[] {
+    const adresse = optionen.adresse?.replace(/\/+$/, '') ?? ''
+    if (optionen.vorrendern && !adresse) {
+        throw new Error('emberbox(): Zum Vorrendern fehlt die adresse.')
+    }
     return [
         ui({
             router: optionen.router ?? true,
@@ -108,6 +123,8 @@ export function emberbox(optionen: EmberboxOptionen = {}): PluginOption[] {
                 define: {
                     __EMBERBOX_COMMIT__: JSON.stringify(FASSUNG.commit),
                     __EMBERBOX_GEBAUT__: JSON.stringify(FASSUNG.gebaut),
+                    __EMBERBOX_ADRESSE__: JSON.stringify(adresse),
+                    __EMBERBOX_BILD__: JSON.stringify(optionen.logo ? '/logo-512.png' : ''),
                 },
                 optimizeDeps: {exclude: ['@emberbox/ui', '@iconify/vue']},
                 resolve: {dedupe: ['vue', 'vue-router', '@nuxt/ui']},
@@ -122,5 +139,7 @@ export function emberbox(optionen: EmberboxOptionen = {}): PluginOption[] {
                 }
             },
         },
+        optionen.logo ? logoPlugin(optionen.logo) : false,
+        optionen.vorrendern && adresse ? vorrenderPlugin(optionen.vorrendern, adresse) : false,
     ]
 }

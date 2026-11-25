@@ -4,6 +4,8 @@ import type {App} from 'vue'
 
 export {HUB_URL, IMPRESSUM_URL, DATENSCHUTZ_URL} from './adressen'
 export {fassung, gebautLesbar} from './fassung'
+export {appErzeugen} from './app'
+export {ADRESSE, useSeite, werkzeugDaten, type SeitenAngaben, type WerkzeugAngaben} from './seite'
 export {useNeueFassung} from './composables/useNeueFassung'
 export {usePolling, type PollingOptionen} from './composables/usePolling'
 export {useRueckfrage, type RueckfrageOptionen} from './composables/useRueckfrage'

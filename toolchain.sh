@@ -30,6 +30,9 @@ Usage: ./toolchain.sh <command> [args...]
   ui-build        Build the Vite plugin of @emberbox/ui
   ui-typecheck    vue-tsc for @emberbox/ui
   ui-icons        Check that EIGENE_ICONS lists exactly the icons the lib components use
+  ui-logos        Regenerate the logo SVGs and PNGs in packages/ui/logos
+  ui-probe        Pack @emberbox/ui, install it into the empty app in probe/, build, prerender and
+                  type check it; EMBERBOX_PROBE_BEHALTEN=1 keeps the temp directory
   hub-dev         Vite dev server of the hub; the pattern page is at /muster
   hub-typecheck   vue-tsc for the hub
   hub-build       Type check and production build of the hub
@@ -46,6 +49,21 @@ case "$command" in
     ui-build) run npm run -w @emberbox/ui build ;;
     ui-typecheck) run npm run -w @emberbox/ui typecheck ;;
     ui-icons) run npm run -w @emberbox/ui icons ;;
+    ui-logos) run npm run -w @emberbox/ui logos ;;
+    ui-probe)
+        "$0" ui-build
+        ziel="$(mktemp -d)"
+        [ -n "${EMBERBOX_PROBE_BEHALTEN:-}" ] || trap 'rm -rf "$ziel"' EXIT
+        run npm pack -w @emberbox/ui --pack-destination "$ziel" >/dev/null
+        mv "$ziel"/emberbox-ui-*.tgz "$ziel/emberbox-ui.tgz"
+        cp -r probe "$ziel/probe"
+        cd "$ziel/probe"
+        run npm install --no-audit --no-fund
+        run npx vite build
+        run node pruefen.mjs
+        run node ohne-adresse.mjs
+        run npx vue-tsc --noEmit
+        ;;
     hub-dev) "$0" ui-build && run npm run -w @emberbox/hub dev -- "$@" ;;
     hub-typecheck) run npm run -w @emberbox/hub typecheck ;;
     hub-build) run npm run -w @emberbox/hub build ;;

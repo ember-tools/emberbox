@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import UApp from '@nuxt/ui/components/App.vue'
 import {de} from '@nuxt/ui/locale'
+import {useHead} from '@unhead/vue'
 import NeueFassung from './NeueFassung.vue'
 
 /**
@@ -8,6 +9,7 @@ import NeueFassung from './NeueFassung.vue'
  * Fenster, und der Hinweis auf einen neuen Build.
  */
 defineOptions({name: 'EmberboxApp'})
+useHead({htmlAttrs: {lang: 'de'}})
 </script>
 
 <template>

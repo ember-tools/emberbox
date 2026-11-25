@@ -1,0 +1,40 @@
+name: Publish @emberbox/ui
+
+on:
+  push:
+    tags:
+      - "ui-v*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Check that the tag is on main
+        run: git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+      - uses: cachix/install-nix-action@v31
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - name: Install dependencies
+        run: nix-shell --run "./toolchain.sh install-clean"
+      - name: Check that the tag matches the package version
+        run: |
+          version="$(nix-shell --run "node -p \"require('./packages/ui/package.json').version\"" | tail -1)"
+          if [ "ui-v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match @emberbox/ui $version" >&2
+            exit 1
+          fi
+      - name: Verify
+        run: nix-shell --run "./toolchain.sh verify && ./toolchain.sh ui-probe"
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > "$HOME/.npmrc"
+          nix-shell --run "npm publish -w @emberbox/ui --access public --provenance"
