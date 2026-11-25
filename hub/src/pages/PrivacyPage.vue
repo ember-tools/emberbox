@@ -18,9 +18,8 @@ usePage({
       <p class="m-0">
         Diese Erklärung gilt für emberbox.app und die Werkzeuge Alarmzettel (alarmzettel.emberbox.app),
         Status Sim (statussim.emberbox.app) und Calltaker (calltaker.emberbox.app). Keines davon verlangt eine
-        Anmeldung, zeigt Werbung oder setzt Analyse- oder Tracking-Dienste ein. Schriften und Symbole liegen auf
-        unseren Servern; beim Aufruf werden sie von keinem fremden Dienst geladen. Ausnahmen nennt diese Erklärung
-        beim jeweiligen Werkzeug.
+        Anmeldung, zeigt Werbung oder setzt Analyse- oder Tracking-Dienste ein. Schriften, Symbole und
+        Kartenkacheln kommen von unseren Servern; beim Aufruf wird nichts von einem fremden Dienst geladen.
       </p>
       <p class="m-0">Ember unter ember-panel.de ist ein eigenes Angebot mit eigener Datenschutzerklärung.</p>
     </section>
@@ -69,10 +68,8 @@ usePage({
         (Art. 6 Abs. 1 lit. f DSGVO).
       </p>
       <p class="m-0">
-        Die Karten (Lagekarte und Punktauswahl) laden Kartenkacheln von OpenStreetMap (OpenStreetMap Foundation,
-        Vereinigtes Königreich). Dabei erhält deren Server die IP-Adresse und die angezeigten Kartenausschnitte.
-        Rechtsgrundlage ist unser berechtigtes Interesse an einer Kartendarstellung (Art. 6 Abs. 1 lit. f DSGVO).
-        Für das Vereinigte Königreich besteht ein Angemessenheitsbeschluss der EU-Kommission.
+        Kartenkacheln für die Lagekarte und die Punktauswahl holt der Server selbst von OpenStreetMap und liefert
+        sie aus; der Browser stellt dafür keine Verbindung zu OpenStreetMap her.
       </p>
     </section>
 
