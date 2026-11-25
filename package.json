@@ -1,0 +1,9 @@
+{
+  "name": "emberbox",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/ui",
+    "hub"
+  ]
+}
