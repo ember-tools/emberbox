@@ -35,7 +35,7 @@ jobs:
             COMMIT=${{ steps.build_info.outputs.commit }}
             BUILD_TIME=${{ steps.build_info.outputs.built_at }}
           tags: |
-            ghcr.io/rainbowdashlabs/emberbox-hub:latest
-            ghcr.io/rainbowdashlabs/emberbox-hub:${{ steps.build_info.outputs.commit }}
+            ghcr.io/ember-tools/emberbox-hub:latest
+            ghcr.io/ember-tools/emberbox-hub:${{ steps.build_info.outputs.commit }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

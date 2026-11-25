@@ -52,7 +52,7 @@ import {AppFooter, AppHeader, EmberboxApp} from '@emberbox/ui'
   <EmberboxApp>
     <AppHeader name="Calltaker" subtitle="Notrufabfrage üben"/>
     <RouterView/>
-    <AppFooter tool="Calltaker" source="https://github.com/rainbowdashlabs/calltaker"
+    <AppFooter tool="Calltaker" source="https://github.com/ember-tools/calltaker"
                license="AGPL-3.0" help="/hilfe"/>
   </EmberboxApp>
 </template>
@@ -152,7 +152,7 @@ imprint and privacy policy cover all tools; the provider details live in
 docker run --rm -p 8080:80 emberbox-hub:local   # view at http://localhost:8080
 ```
 
-On `main`, CI builds the image `ghcr.io/rainbowdashlabs/emberbox-hub`. `hub/compose.yml` runs it
+On `main`, CI builds the image `ghcr.io/ember-tools/emberbox-hub`. `hub/compose.yml` runs it
 behind Traefik at `emberbox.app`.
 
 ## Publishing

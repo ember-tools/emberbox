@@ -10,7 +10,7 @@ npm install @emberbox/ui
 ```
 
 Setup and examples are in the
-[repository README](https://github.com/rainbowdashlabs/emberbox#readme).
+[repository README](https://github.com/ember-tools/emberbox#readme).
 
 ## License
 

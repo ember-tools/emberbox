@@ -238,5 +238,5 @@ const columns: TableColumn<Unit>[] = [
       </HelpSection>
     </section>
   </div>
-  <AppFooter tool="Muster" source="https://github.com/rainbowdashlabs/emberbox" license="MIT" help="/pattern/help"/>
+  <AppFooter tool="Muster" source="https://github.com/ember-tools/emberbox" license="MIT" help="/pattern/help"/>
 </template>

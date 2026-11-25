@@ -63,7 +63,7 @@ export const TOOLS: Tool[] = [
         logo: calltaker,
         audiences: ['Einsatzabteilung', 'Leitstelle'],
         category: 'EducationalApplication',
-        source: 'https://github.com/rainbowdashlabs/calltaker',
+        source: 'https://github.com/ember-tools/calltaker',
         license: 'AGPL-3.0',
         help: 'https://calltaker.emberbox.app/hilfe',
     },

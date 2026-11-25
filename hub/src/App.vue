@@ -11,6 +11,6 @@ const bare = computed(() => route.meta.bare === true)
   <EmberboxApp>
     <AppHeader v-if="!bare" name="Emberbox" subtitle="Werkzeuge für die Feuerwehr" logo="/favicon.svg"/>
     <RouterView/>
-    <AppFooter v-if="!bare" tool="Emberbox" source="https://github.com/rainbowdashlabs/emberbox" license="MIT" :backlink="false"/>
+    <AppFooter v-if="!bare" tool="Emberbox" source="https://github.com/ember-tools/emberbox" license="MIT" :backlink="false"/>
   </EmberboxApp>
 </template>
