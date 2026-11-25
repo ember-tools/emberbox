@@ -33,8 +33,4 @@ jobs:
       - name: Verify
         run: nix-shell --run "./toolchain.sh verify && ./toolchain.sh ui-probe"
       - name: Publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" > "$HOME/.npmrc"
-          nix-shell --run "npm publish -w @emberbox/ui --access public --provenance"
+        run: nix-shell --run "npm publish -w @emberbox/ui --access public --provenance"
