@@ -1,7 +1,7 @@
 {
   "name": "@emberbox/ui",
-  "version": "0.1.0",
-  "description": "Gemeinsamer Stil und gemeinsame Bausteine der Emberbox-Werkzeuge, auf Basis von Nuxt UI.",
+  "version": "0.2.0",
+  "description": "Shared look and building blocks of the Emberbox tools, built on Nuxt UI.",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -16,19 +16,19 @@
   ],
   "exports": {
     ".": "./src/index.ts",
-    "./vorrendern": "./src/vorrendern.ts",
+    "./prerender": "./src/prerender.ts",
     "./vite": {
       "types": "./dist/vite.d.ts",
       "import": "./dist/vite.js"
     },
-    "./stil.css": "./src/stil.css",
+    "./style.css": "./src/style.css",
     "./logos/*": "./logos/*"
   },
   "scripts": {
     "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.vite.json",
     "typecheck": "vue-tsc -b",
-    "icons": "node scripts/icons-pruefen.mjs",
-    "logos": "node scripts/logos-bauen.mjs",
+    "icons": "node scripts/check-icons.mjs",
+    "logos": "node scripts/build-logos.mjs",
     "prepack": "npm run build"
   },
   "dependencies": {

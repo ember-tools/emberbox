@@ -1,20 +1,20 @@
 import {createRouter, type RouteRecordRaw, type RouterHistory} from 'vue-router'
 
-/** Die öffentlichen Seiten; jede wird beim Bauen vorgerendert. */
-export const SEITEN: RouteRecordRaw[] = [
-    {path: '/', component: () => import('./seiten/StartSeite.vue')},
-    {path: '/impressum', component: () => import('./seiten/ImpressumSeite.vue')},
-    {path: '/datenschutz', component: () => import('./seiten/DatenschutzSeite.vue')},
+/** The public pages; every one of them is prerendered at build time. */
+export const PAGES: RouteRecordRaw[] = [
+    {path: '/', component: () => import('./pages/StartPage.vue')},
+    {path: '/impressum', component: () => import('./pages/ImprintPage.vue')},
+    {path: '/datenschutz', component: () => import('./pages/PrivacyPage.vue')},
 ]
 
-const entwicklung: RouteRecordRaw[] = import.meta.env.DEV
+const development: RouteRecordRaw[] = import.meta.env.DEV
     ? [
-        {path: '/muster', component: () => import('./muster/MusterSeite.vue')},
-        {path: '/muster/hilfe', component: () => import('./muster/HilfeMuster.vue')},
+        {path: '/pattern', component: () => import('./pattern/PatternPage.vue')},
+        {path: '/pattern/help', component: () => import('./pattern/HelpPatternPage.vue')},
     ]
     : []
 
-/** Der Router des Hubs, im Browser mit Web-History, beim Vorrendern mit Memory-History. */
-export function routerErzeugen(history: RouterHistory) {
-    return createRouter({history, routes: [...SEITEN, ...entwicklung]})
+/** The hub's router, with web history in the browser and memory history when prerendering. */
+export function createHubRouter(history: RouterHistory) {
+    return createRouter({history, routes: [...PAGES, ...development]})
 }

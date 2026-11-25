@@ -29,14 +29,14 @@ Usage: ./toolchain.sh <command> [args...]
   install-clean   npm ci
   ui-build        Build the Vite plugin of @emberbox/ui
   ui-typecheck    vue-tsc for @emberbox/ui
-  ui-icons        Check that EIGENE_ICONS lists exactly the icons the lib components use
+  ui-icons        Check that OWN_ICONS lists exactly the icons the lib components use
   ui-logos        Regenerate the logo SVGs and PNGs in packages/ui/logos
   ui-probe        Pack @emberbox/ui, install it into the empty app in probe/, build, prerender and
-                  type check it; EMBERBOX_PROBE_BEHALTEN=1 keeps the temp directory
-  hub-dev         Vite dev server of the hub; the pattern page is at /muster
+                  type check it; EMBERBOX_PROBE_KEEP=1 keeps the temp directory
+  hub-dev         Vite dev server of the hub; the pattern page is at /pattern
   hub-typecheck   vue-tsc for the hub
   hub-build       Type check and production build of the hub
-  hub-image       Build the hub container image locally as emberbox-hub:lokal
+  hub-image       Build the hub container image locally as emberbox-hub:local
   verify          ui-build, ui-typecheck, ui-icons and hub-build
 TEXT
 }
@@ -53,22 +53,22 @@ case "$command" in
     ui-logos) run npm run -w @emberbox/ui logos ;;
     ui-probe)
         "$0" ui-build
-        ziel="$(mktemp -d)"
-        [ -n "${EMBERBOX_PROBE_BEHALTEN:-}" ] || trap 'rm -rf "$ziel"' EXIT
-        run npm pack -w @emberbox/ui --pack-destination "$ziel" >/dev/null
-        mv "$ziel"/emberbox-ui-*.tgz "$ziel/emberbox-ui.tgz"
-        cp -r probe "$ziel/probe"
-        cd "$ziel/probe"
+        target="$(mktemp -d)"
+        [ -n "${EMBERBOX_PROBE_KEEP:-}" ] || trap 'rm -rf "$target"' EXIT
+        run npm pack -w @emberbox/ui --pack-destination "$target" >/dev/null
+        mv "$target"/emberbox-ui-*.tgz "$target/emberbox-ui.tgz"
+        cp -r probe "$target/probe"
+        cd "$target/probe"
         run npm install --no-audit --no-fund
         run npx vite build
-        run node pruefen.mjs
-        run node ohne-adresse.mjs
+        run node check.mjs
+        run node without-url.mjs
         run npx vue-tsc --noEmit
         ;;
     hub-dev) "$0" ui-build && run npm run -w @emberbox/hub dev -- "$@" ;;
     hub-typecheck) run npm run -w @emberbox/hub typecheck ;;
     hub-build) run npm run -w @emberbox/hub build ;;
-    hub-image) docker build -f hub/Dockerfile --build-arg COMMIT="$(git rev-parse --short HEAD)" -t emberbox-hub:lokal . ;;
+    hub-image) docker build -f hub/Dockerfile --build-arg COMMIT="$(git rev-parse --short HEAD)" -t emberbox-hub:local . ;;
     verify)
         "$0" ui-build
         "$0" ui-typecheck

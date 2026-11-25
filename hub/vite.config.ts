@@ -6,9 +6,9 @@ export default defineConfig({
     plugins: [
         vue(),
         emberbox({
-            adresse: 'https://emberbox.app',
+            url: 'https://emberbox.app',
             logo: 'emberbox',
-            vorrendern: {eintrag: 'src/vorrendern.ts', pfade: ['/', '/impressum', '/datenschutz']},
+            prerender: {entry: 'src/prerender.ts', paths: ['/', '/impressum', '/datenschutz']},
         }),
     ],
 })

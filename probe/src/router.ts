@@ -1,12 +1,12 @@
 import {createRouter, type RouterHistory} from 'vue-router'
 
-/** Die Seiten der Probe, für Browser und Vorrendern mit jeweils eigener History. */
-export function routerErzeugen(history: RouterHistory) {
+/** The probe's pages, with a separate history for the browser and for prerendering. */
+export function createProbeRouter(history: RouterHistory) {
     return createRouter({
         history,
         routes: [
-            {path: '/', component: () => import('./StartSeite.vue')},
-            {path: '/hilfe', component: () => import('./HilfeSeite.vue')},
+            {path: '/', component: () => import('./StartView.vue')},
+            {path: '/hilfe', component: () => import('./HelpView.vue')},
         ],
     })
 }

@@ -6,9 +6,9 @@ export default defineConfig({
     plugins: [
         vue(),
         emberbox({
-            adresse: 'https://probe.emberbox.app/',
+            url: 'https://probe.emberbox.app/',
             logo: 'calltaker',
-            vorrendern: {eintrag: 'src/vorrendern.ts', pfade: ['/', '/hilfe']},
+            prerender: {entry: 'src/prerender.ts', paths: ['/', '/hilfe']},
         }),
     ],
 })

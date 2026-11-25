@@ -22,20 +22,20 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - id: fassung
+      - id: build_info
         run: |
           echo "commit=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-          echo "gebaut=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+          echo "built_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         with:
           context: .
           file: hub/Dockerfile
           push: ${{ github.event_name == 'push' }}
           build-args: |
-            COMMIT=${{ steps.fassung.outputs.commit }}
-            GEBAUT=${{ steps.fassung.outputs.gebaut }}
+            COMMIT=${{ steps.build_info.outputs.commit }}
+            BUILD_TIME=${{ steps.build_info.outputs.built_at }}
           tags: |
             ghcr.io/rainbowdashlabs/emberbox-hub:latest
-            ghcr.io/rainbowdashlabs/emberbox-hub:${{ steps.fassung.outputs.commit }}
+            ghcr.io/rainbowdashlabs/emberbox-hub:${{ steps.build_info.outputs.commit }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
