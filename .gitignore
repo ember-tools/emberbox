@@ -1,0 +1,5 @@
+.concept/
+.direnv/
+node_modules/
+dist/
+*.tsbuildinfo
