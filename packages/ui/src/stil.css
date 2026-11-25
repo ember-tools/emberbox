@@ -158,3 +158,13 @@ body {
         transition-duration: 0.01ms !important;
     }
 }
+
+@utility feld-label {
+    font-family: var(--font-condensed);
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 1.2;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ui-text-muted);
+}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {CalendarDate} from '@internationalized/date'
+import {AppFuss, AppKopf, CodeAnzeige, HilfeAbschnitt, HilfeThema, NeueFassung, usePolling, useRueckfrage} from '@emberbox/ui'
 import type {DropdownMenuItem, TableColumn, TabsItem, AccordionItem, StepperItem} from '@nuxt/ui'
 import {ref, shallowRef} from 'vue'
 
@@ -21,6 +22,16 @@ const dialog = ref(false)
 const panel = ref(false)
 
 const toast = useToast()
+const rueckfrage = useRueckfrage()
+const antwort = ref<boolean | null>(null)
+const runden = ref(0)
+const {verbunden} = usePolling(async () => {
+  runden.value++
+}, {intervallMs: 5_000})
+
+async function fragen(): Promise<void> {
+  antwort.value = await rueckfrage('Sitzung löschen?', {erklaerung: 'Das lässt sich nicht rückgängig machen.', bestaetigung: 'Löschen', gefahr: true})
+}
 
 const menue: DropdownMenuItem[][] = [
   [{label: 'Teilen', icon: 'i-lucide-share-2'}, {label: 'Nur-Lesen-Link', icon: 'i-lucide-eye'}],
@@ -61,15 +72,16 @@ const spalten: TableColumn<Einheit>[] = [
 </script>
 
 <template>
+  <AppKopf name="Muster" untertitel="Emberbox-Bausteine">
+    <template #navigation>
+      <ULink to="/muster" class="text-highlighted">Muster</ULink>
+      <ULink to="/muster/hilfe" class="text-muted">Hilfe</ULink>
+    </template>
+    <template #aktionen>
+      <UButton size="sm" color="neutral" variant="outline" icon="i-lucide-plus" label="Neu"/>
+    </template>
+  </AppKopf>
   <div class="mx-auto max-w-5xl px-4 py-8 flex flex-col gap-10">
-    <header class="flex items-center justify-between gap-4">
-      <div>
-        <p class="eyebrow">Emberbox</p>
-        <h1 class="headline text-4xl">Muster</h1>
-      </div>
-      <UColorModeButton/>
-    </header>
-
     <section class="flex flex-col gap-3">
       <h2 class="eyebrow">Schrift</h2>
       <p class="headline text-2xl">Barlow Condensed für Überschriften</p>
@@ -182,5 +194,25 @@ const spalten: TableColumn<Einheit>[] = [
       <UTable :data="einheiten" :columns="spalten"/>
       <UEmpty icon="i-lucide-inbox" title="Noch keine Einsätze" description="Lege einen Einsatz an, um zu beginnen."/>
     </section>
+
+    <section class="flex flex-col gap-3">
+      <h2 class="eyebrow">Emberbox-Bausteine</h2>
+      <NeueFassung immer/>
+      <div class="flex flex-wrap gap-6">
+        <CodeAnzeige titel="Ausbilder" code="A-7K2M9QX4" link="https://calltaker.emberbox.app/a/A-7K2M9QX4" qr/>
+        <CodeAnzeige titel="Trainee" code="T-3PL8WD2N" verdeckt/>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <UButton color="neutral" variant="outline" label="Rückfrage" @click="fragen"/>
+        <span class="text-muted">Antwort: {{ antwort === null ? '–' : antwort ? 'bestätigt' : 'abgebrochen' }}</span>
+        <UBadge :color="verbunden ? 'success' : 'error'" variant="soft" :label="`Polling: ${runden} Runden`"/>
+      </div>
+      <HilfeAbschnitt titel="Hilfe-Abschnitt">
+        <HilfeThema titel="Ein Thema" :texte="['Erster Absatz eines Hilfethemas.', 'Zweiter Absatz.']" mockup="So sieht das in der Oberfläche aus.">
+          <CodeAnzeige titel="Beispiel" code="A-1234"/>
+        </HilfeThema>
+      </HilfeAbschnitt>
+    </section>
   </div>
+  <AppFuss werkzeug="Muster" quelle="https://github.com/rainbowdashlabs/emberbox" lizenz="MIT" hilfe="/muster/hilfe"/>
 </template>

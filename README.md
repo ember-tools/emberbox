@@ -44,7 +44,40 @@ import {emberboxUi} from '@emberbox/ui'
 createApp(App).use(router).use(emberboxUi).mount('#app')
 ```
 
-Die App liegt in `<UApp>`. Werkzeuge ohne vue-router nutzen `emberbox({router: false})`.
+```vue
+<!-- App.vue -->
+<script setup lang="ts">
+import {AppFuss, AppKopf, EmberboxApp} from '@emberbox/ui'
+</script>
+
+<template>
+  <EmberboxApp>
+    <AppKopf name="Calltaker" untertitel="Notrufabfrage üben"/>
+    <RouterView/>
+    <AppFuss werkzeug="Calltaker" quelle="https://github.com/rainbowdashlabs/calltaker"
+             lizenz="AGPL-3.0" hilfe="/hilfe"/>
+  </EmberboxApp>
+</template>
+```
+
+`EmberboxApp` stellt Nuxt UI auf Deutsch und zeigt ein Band, sobald ein neuerer Build ausgeliefert
+wird. Werkzeuge ohne vue-router nutzen `emberbox({router: false})`.
+
+Commit und Bauzeit stehen als `fassung` aus `@emberbox/ui` bereit und erscheinen im Fuß.
+`emberbox()` liest sie aus `git` oder, im Image-Build ohne `.git`, aus den Umgebungsvariablen
+`COMMIT` und `GEBAUT`:
+
+```dockerfile
+ARG COMMIT=dev
+ARG GEBAUT
+RUN COMMIT=$COMMIT GEBAUT=$GEBAUT npm run build
+```
+
+Neben jedem Build liegt `fassung.json`. Das Backend liefert sie im Wurzelverzeichnis aus, ohne
+Caching (`Cache-Control: no-store`), damit offene Seiten einen neuen Build bemerken.
+
+Weitere Bausteine: `CodeAnzeige`, `useRueckfrage`, `usePolling` und die Hilfe-Komponenten
+`HilfeSeite`, `HilfeAbschnitt`, `HilfeThema`, `HilfeMockup`. Die Musterseite zeigt sie alle.
 
 Primäre Knöpfe sind tintenschwarz, Rot gibt es als Farbe `signal` und für Fehler (`error`).
 Icons kommen aus Lucide (`i-lucide-*`) und werden beim Bauen gebündelt.

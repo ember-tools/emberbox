@@ -29,10 +29,11 @@ Usage: ./toolchain.sh <command> [args...]
   install-clean   npm ci
   ui-build        Build the Vite plugin of @emberbox/ui
   ui-typecheck    vue-tsc for @emberbox/ui
+  ui-icons        Check that EIGENE_ICONS lists exactly the icons the lib components use
   hub-dev         Vite dev server of the hub; the pattern page is at /muster
   hub-typecheck   vue-tsc for the hub
   hub-build       Type check and production build of the hub
-  verify          ui-build, ui-typecheck and hub-build
+  verify          ui-build, ui-typecheck, ui-icons and hub-build
 TEXT
 }
 
@@ -44,12 +45,14 @@ case "$command" in
     install-clean) run npm ci "$@" ;;
     ui-build) run npm run -w @emberbox/ui build ;;
     ui-typecheck) run npm run -w @emberbox/ui typecheck ;;
+    ui-icons) run npm run -w @emberbox/ui icons ;;
     hub-dev) "$0" ui-build && run npm run -w @emberbox/hub dev -- "$@" ;;
     hub-typecheck) run npm run -w @emberbox/hub typecheck ;;
     hub-build) run npm run -w @emberbox/hub build ;;
     verify)
         "$0" ui-build
         "$0" ui-typecheck
+        "$0" ui-icons
         "$0" hub-build
         ;;
     help | -h | --help) usage ;;

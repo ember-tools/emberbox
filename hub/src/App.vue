@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {de} from '@nuxt/ui/locale'
+import {EmberboxApp} from '@emberbox/ui'
 </script>
 
 <template>
-  <UApp :locale="de">
+  <EmberboxApp>
     <RouterView/>
-  </UApp>
+  </EmberboxApp>
 </template>
