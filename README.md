@@ -77,7 +77,12 @@ Every build contains `build.json`. The backend serves it at the root without cac
 (`Cache-Control: no-store`), so open pages notice a new build.
 
 Further building blocks: `CodeDisplay`, `useConfirm`, `usePolling` and the help components
-`HelpPage`, `HelpSection`, `HelpTopic`, `HelpMockup`. The pattern page shows all of them.
+`HelpPage`, `HelpSection`, `HelpTopic`, `HelpMockup`. Form fields with a label: `TextField` (with optional
+suggestions), `TextAreaField`, `ComboboxField` (free text plus a suggestion list, optionally
+filtered by the server), `YesNoField` (configurable values and labels), `DateTimeField` (date and
+time as two strings in German notation) and `CollapsibleSection`, which remembers whether it was
+open. Besides their own props the fields pass `class`, `hint`, `help`, `error` and
+`required` on to the `UFormField` around them; all of them take `disabled`. The pattern page shows all of them.
 
 ## Logo, SEO and prerendering
 

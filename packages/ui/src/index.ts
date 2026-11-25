@@ -20,6 +20,12 @@ export {default as HelpPage} from './components/HelpPage.vue'
 export {default as HelpSection} from './components/HelpSection.vue'
 export {default as HelpTopic} from './components/HelpTopic.vue'
 export {default as HelpMockup} from './components/HelpMockup.vue'
+export {default as TextField} from './components/TextField.vue'
+export {default as TextAreaField} from './components/TextAreaField.vue'
+export {default as ComboboxField} from './components/ComboboxField.vue'
+export {default as YesNoField} from './components/YesNoField.vue'
+export {default as DateTimeField} from './components/DateTimeField.vue'
+export {default as CollapsibleSection} from './components/CollapsibleSection.vue'
 
 /**
  * Vue plugin that installs Nuxt UI in the Emberbox style. Icons come only from the bundled set; a

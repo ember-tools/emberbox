@@ -61,6 +61,8 @@ const ICON_SCAN = {
  */
 export const OWN_ICONS = [
     'i-lucide-check',
+    'i-lucide-chevron-down',
+    'i-lucide-chevron-right',
     'i-lucide-copy',
     'i-lucide-github',
     'i-lucide-layout-grid',

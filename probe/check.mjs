@@ -29,6 +29,8 @@ expect(start.includes('content="https://probe.emberbox.app/logo-512.png"'), 'sta
 expect(start.includes('name="twitter:card" content="summary"'), 'start page has no Twitter card')
 expect(start.includes('content="index, follow"'), 'start page has no robots')
 expect(start.includes('A-PROBE'), 'start page has no code display')
+expect(start.includes('Probe-Feld') && start.includes('<datalist'), 'start page has no text field')
+expect(start.includes('Inhalt des Probe-Abschnitts') && start.includes('aria-expanded="true"'), 'start page has no open collapsible section')
 expect(/href="https:\/\/emberbox\.app"[^>]*>(?:(?!<\/a>).)*Ein Werkzeug der/s.test(start), 'start page has no backlink to the hub')
 expect(start.includes('<svg'), 'start page has no bundled icons')
 expect(start.includes('nuxt-ui-colors'), 'start page has no colours')

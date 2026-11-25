@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import {CalendarDate} from '@internationalized/date'
-import {AppFooter, AppHeader, CodeDisplay, HelpSection, HelpTopic, NewBuildBanner, usePolling, useConfirm} from '@emberbox/ui'
+import {
+  AppFooter, AppHeader, CodeDisplay, CollapsibleSection, ComboboxField, DateTimeField, HelpSection, HelpTopic,
+  NewBuildBanner, TextAreaField, TextField, YesNoField, useConfirm, usePolling,
+} from '@emberbox/ui'
 import type {DropdownMenuItem, TableColumn, TabsItem, AccordionItem, StepperItem} from '@nuxt/ui'
 import {ref, shallowRef} from 'vue'
 
@@ -17,6 +20,12 @@ const freeText = ref('')
 const checked = ref(true)
 const toggled = ref(false)
 const personInside = ref('yes')
+const callSign = ref('')
+const incident = ref('')
+const police = ref('N')
+const alarmDate = ref('25.11.2026')
+const alarmTime = ref('08:00')
+const situation = ref('')
 const date = shallowRef(new CalendarDate(2026, 11, 25))
 const dialog = ref(false)
 const panel = ref(false)
@@ -193,6 +202,21 @@ const columns: TableColumn<Unit>[] = [
       <USkeleton class="h-6 w-48"/>
       <UTable :data="units" :columns="columns"/>
       <UEmpty icon="i-lucide-inbox" title="Noch keine Einsätze" description="Lege einen Einsatz an, um zu beginnen."/>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-2">
+      <h2 class="eyebrow md:col-span-2">Emberbox-Felder</h2>
+      <TextField v-model="callSign" label="Funkrufname" :suggestions="['Florian Berlin 1100/1', 'Florian Berlin 1100/3']"/>
+      <ComboboxField v-model="incident" label="Stichwort" :suggestions="['B:Rauch', 'B:Wohnung', 'TH:Person']"/>
+      <YesNoField v-model="police" label="Polizei" yes-value="J" no-value="N" yes-label="J" no-label="N" yes-title="Ja" no-title="Nein"/>
+      <DateTimeField v-model:date="alarmDate" v-model:time="alarmTime" label="Einsatz"/>
+      <TextAreaField v-model="situation" label="Lage" :rows="2" class="md:col-span-2"/>
+      <CollapsibleSection name="pattern" title="Klappabschnitt" :count="3" icon="i-lucide-users" class="md:col-span-2">
+        <template #actions>
+          <UButton size="sm" color="neutral" variant="outline" icon="i-lucide-plus" label="Neu"/>
+        </template>
+        <p class="m-0 text-muted">Der Zustand bleibt beim Neuladen erhalten.</p>
+      </CollapsibleSection>
     </section>
 
     <section class="flex flex-col gap-3">
