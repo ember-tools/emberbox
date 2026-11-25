@@ -146,7 +146,7 @@ behind Traefik at `emberbox.app`.
 ## Publishing
 
 `@emberbox/ui` is published to npmjs when a tag `ui-vX.Y.Z` matching the version in
-`packages/ui/package.json` is pushed on `main`. npm trusts the workflow `ui-veroeffentlichen.yml` as
+`packages/ui/package.json` is pushed on `main`. npm trusts the workflow `publish-ui.yml` as
 publisher (trusted publishing), so no token is needed.
 
 The logo pictograms come from [Lucide](https://lucide.dev) (ISC); `./toolchain.sh ui-logos`
