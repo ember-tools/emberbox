@@ -1,18 +1,18 @@
 # @emberbox/ui
 
-Gemeinsamer Stil und gemeinsame Bausteine der [Emberbox](https://emberbox.app)-Werkzeuge für
-Ausbildung und Übung in der Feuerwehr. Baut auf [Nuxt UI](https://ui.nuxt.com) auf und bringt
-dessen Komponenten im Emberbox-Stil mit, dazu Kopf, Fuß, Code-Anzeige, Rückfragen, Hilfe-Seiten,
-SEO und Vorrendern.
+Shared look and building blocks of the [Emberbox](https://emberbox.app) tools for fire brigade
+training and exercises. Built on [Nuxt UI](https://ui.nuxt.com), it brings Nuxt UI's components in
+the Emberbox style, plus header, footer, code display, confirmation dialogs, help pages, SEO and
+prerendering. The components' texts are German.
 
 ```sh
 npm install @emberbox/ui
 ```
 
-Einrichtung und Beispiele stehen im
-[README des Repositorys](https://github.com/rainbowdashlabs/emberbox#readme).
+Setup and examples are in the
+[repository README](https://github.com/rainbowdashlabs/emberbox#readme).
 
-## Lizenz
+## License
 
-MIT. Die Piktogramme der Logos in `logos/` stammen aus [Lucide](https://lucide.dev) (ISC); beide
-Lizenztexte stehen in `LICENSE`.
+MIT. The logo pictograms in `logos/` come from [Lucide](https://lucide.dev) (ISC); both license
+texts are in `LICENSE`.
