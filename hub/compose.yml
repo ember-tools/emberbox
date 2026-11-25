@@ -1,0 +1,10 @@
+services:
+  hub:
+    image: ghcr.io/rainbowdashlabs/emberbox-hub:latest
+    restart: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.emberbox-hub.rule: "Host(`emberbox.app`)"
+      traefik.http.routers.emberbox-hub.entrypoints: websecure
+      traefik.http.routers.emberbox-hub.tls.certresolver: letsencrypt
+      traefik.http.services.emberbox-hub.loadbalancer.server.port: "80"
