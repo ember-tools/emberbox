@@ -118,6 +118,8 @@ export function emberbox(options: EmberboxOptions = {}): PluginOption[] {
             ui: defu(options.ui, DEFAULTS),
             icon: {clientBundle: {scan: ICON_SCAN, icons: OWN_ICONS}},
             scanPackages: ['@emberbox/ui'],
+            dts: false,
+            components: {dirs: []},
         }),
         {
             name: 'emberbox',

@@ -52,7 +52,7 @@ import {AppFooter, AppHeader, EmberboxApp} from '@emberbox/ui'
   <EmberboxApp>
     <AppHeader name="Calltaker" subtitle="Notrufabfrage üben"/>
     <RouterView/>
-    <AppFooter tool="Calltaker" source="https://github.com/rainbowdashlabs/calltaker"
+    <AppFooter tool="Calltaker" source="https://github.com/ember-tools/calltaker"
                license="AGPL-3.0" help="/hilfe"/>
   </EmberboxApp>
 </template>
@@ -60,8 +60,13 @@ import {AppFooter, AppHeader, EmberboxApp} from '@emberbox/ui'
 
 `EmberboxApp` sets Nuxt UI to German and shows a banner as soon as a newer build is served. Tools
 without vue-router use `emberbox({router: false})`. `AppFooter` links back to the Emberbox hub;
-`backlink: false` turns that off. The tool's tsconfig needs the `vite/client` types, since the
-library ships as source and imports its logo with `?url`.
+`backlink: false` turns that off. The tool's tsconfig lists `"types": ["vite/client", "@emberbox/ui/types"]`: the
+first because the library ships as source and imports its logo with `?url`, the second for the
+global types of everything Nuxt UI auto-imports. `emberbox()` therefore turns off Nuxt UI's own
+`auto-imports.d.ts` and `components.d.ts`, so a tool keeps no generated type files. Only Nuxt
+UI's components and composables are auto-imported; a tool imports its own components explicitly.
+The types follow the Nuxt UI version a library release was built with, so a newer Nuxt UI
+component is typed once the library is updated.
 
 The commit and build time are available as `buildInfo` from `@emberbox/ui` and appear in the footer.
 `emberbox()` reads them from `git` or, in an image build without `.git`, from the environment
@@ -147,7 +152,7 @@ imprint and privacy policy cover all tools; the provider details live in
 docker run --rm -p 8080:80 emberbox-hub:local   # view at http://localhost:8080
 ```
 
-On `main`, CI builds the image `ghcr.io/rainbowdashlabs/emberbox-hub`. `hub/compose.yml` runs it
+On `main`, CI builds the image `ghcr.io/ember-tools/emberbox-hub`. `hub/compose.yml` runs it
 behind Traefik at `emberbox.app`.
 
 ## Publishing

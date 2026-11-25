@@ -4,7 +4,7 @@
     "noEmit": true,
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "types": ["vite/client"]
+    "types": ["vite/client", "@emberbox/ui/types"]
   },
-  "include": ["src/**/*.ts", "src/**/*.vue", "auto-imports.d.ts", "components.d.ts"]
+  "include": ["src/**/*.ts", "src/**/*.vue"]
 }

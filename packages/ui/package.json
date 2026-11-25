@@ -1,12 +1,12 @@
 {
   "name": "@emberbox/ui",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Shared look and building blocks of the Emberbox tools, built on Nuxt UI.",
   "type": "module",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rainbowdashlabs/emberbox.git",
+    "url": "git+https://github.com/ember-tools/emberbox.git",
     "directory": "packages/ui"
   },
   "files": [
@@ -22,10 +22,13 @@
       "import": "./dist/vite.js"
     },
     "./style.css": "./src/style.css",
-    "./logos/*": "./logos/*"
+    "./logos/*": "./logos/*",
+    "./types": {
+      "types": "./dist/globals.d.ts"
+    }
   },
   "scripts": {
-    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.vite.json",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.vite.json && node scripts/build-types.mjs",
     "typecheck": "vue-tsc -b",
     "icons": "node scripts/check-icons.mjs",
     "logos": "node scripts/build-logos.mjs",
