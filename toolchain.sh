@@ -36,6 +36,7 @@ Usage: ./toolchain.sh <command> [args...]
   hub-dev         Vite dev server of the hub; the pattern page is at /muster
   hub-typecheck   vue-tsc for the hub
   hub-build       Type check and production build of the hub
+  hub-image       Build the hub container image locally as emberbox-hub:lokal
   verify          ui-build, ui-typecheck, ui-icons and hub-build
 TEXT
 }
@@ -67,6 +68,7 @@ case "$command" in
     hub-dev) "$0" ui-build && run npm run -w @emberbox/hub dev -- "$@" ;;
     hub-typecheck) run npm run -w @emberbox/hub typecheck ;;
     hub-build) run npm run -w @emberbox/hub build ;;
+    hub-image) docker build -f hub/Dockerfile --build-arg COMMIT="$(git rev-parse --short HEAD)" -t emberbox-hub:lokal . ;;
     verify)
         "$0" ui-build
         "$0" ui-typecheck

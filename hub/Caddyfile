@@ -1,0 +1,42 @@
+{
+	admin off
+	auto_https off
+}
+
+:80 {
+	root * /srv
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Content-Security-Policy "frame-ancestors 'none'"
+		Strict-Transport-Security "max-age=31536000"
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+	header /fassung.json Cache-Control "no-store"
+	header /assets/* Cache-Control "public, max-age=31536000, immutable"
+
+	@intern path /index.html /seiten/*
+	route {
+		error @intern 404
+		try_files /seiten{path}/index.html {path}
+		file_server
+	}
+
+	handle_errors 404 {
+		header Content-Type "text/html; charset=utf-8"
+		respond <<HTML
+			<!doctype html>
+			<html lang="de">
+			<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+			<meta name="robots" content="noindex">
+			<title>Seite nicht gefunden – Emberbox</title>
+			<p style="font-family: system-ui, sans-serif; margin: 3rem auto; max-width: 32rem">
+			Diese Seite gibt es nicht. <a href="/">Zur Startseite von Emberbox</a>
+			</p>
+			</html>
+			HTML 404
+	}
+}

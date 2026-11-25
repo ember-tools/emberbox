@@ -1,7 +1,9 @@
-import {createApp} from 'vue'
-import {emberboxUi} from '@emberbox/ui'
+import {appErzeugen, emberboxUi} from '@emberbox/ui'
+import {createWebHistory} from 'vue-router'
 import App from './App.vue'
-import {router} from './router'
+import {routerErzeugen} from './router'
 import './stil.css'
 
-createApp(App).use(router).use(emberboxUi).mount('#app')
+const router = routerErzeugen(createWebHistory())
+const app = appErzeugen(App).use(router).use(emberboxUi)
+void router.isReady().then(() => app.mount('#app'))

@@ -127,6 +127,21 @@ npm pack -w @emberbox/ui            # erzeugt emberbox-ui-<version>.tgz
 cd ../werkzeug/frontend && npm install ../../emberbox/emberbox-ui-<version>.tgz
 ```
 
+## Hub
+
+Der Hub unter `hub/` ist komplett vorgerendert und läuft als statische Seite in einem
+Caddy-Container. Die Werkzeuge stehen in `hub/src/werkzeuge.ts`; ein neues Werkzeug ist dort ein
+Eintrag mehr. Impressum und Datenschutz gelten für alle Werkzeuge, die Angaben zum Anbieter stehen
+in `hub/src/rechtliches.ts`.
+
+```sh
+./toolchain.sh hub-image                       # Image lokal bauen
+docker run --rm -p 8080:80 emberbox-hub:lokal   # unter http://localhost:8080 ansehen
+```
+
+Auf `main` baut die CI das Image `ghcr.io/rainbowdashlabs/emberbox-hub`. `hub/compose.yml` startet
+es hinter Traefik unter `emberbox.app`.
+
 ## Veröffentlichen
 
 `@emberbox/ui` erscheint auf npmjs, sobald ein Tag `ui-vX.Y.Z` auf `main` gepusht wird, das zur
