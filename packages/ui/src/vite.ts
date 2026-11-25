@@ -4,34 +4,34 @@ import {defu} from 'defu'
 import {execSync} from 'node:child_process'
 import type {PluginOption} from 'vite'
 import {type Logo, logoPlugin} from './vite/logo.js'
-import {vorrenderPlugin, type VorrendernOptionen} from './vite/vorrendern.js'
+import {prerenderPlugin, type PrerenderOptions} from './vite/prerender.js'
 
-export {SEITEN_VERZEICHNIS, type VorrendernOptionen} from './vite/vorrendern.js'
+export {PAGES_DIR, type PrerenderOptions} from './vite/prerender.js'
 export type {Logo} from './vite/logo.js'
 
-/** Einstellungen, mit denen ein Werkzeug `emberbox()` an seine Lage anpasst. */
-export interface EmberboxOptionen {
-    /** `false` für Werkzeuge ohne vue-router; Links werden dann als einfache Anker gerendert. */
+/** Settings a tool passes to `emberbox()`. */
+export interface EmberboxOptions {
+    /** `false` for tools without vue-router; links are then rendered as plain anchors. */
     router?: boolean
-    /** Zusätzliche Nuxt-UI-Einstellungen des Werkzeugs, die über die Emberbox-Vorgaben gelegt werden. */
+    /** Additional Nuxt UI settings of the tool, applied on top of the Emberbox defaults. */
     ui?: NuxtUIOptions['ui']
-    /** Die öffentliche Adresse, etwa `https://calltaker.emberbox.app`; ein `/` am Ende fällt weg. */
-    adresse?: string
-    /** Welches Emberbox-Logo als Favicon, Touch-Icon und Vorschaubild ausgeliefert wird. */
+    /** The public address, such as `https://calltaker.emberbox.app`; a trailing `/` is dropped. */
+    url?: string
+    /** Which Emberbox logo is served as favicon, touch icon and preview image. */
     logo?: Logo
-    /** Welche öffentlichen Seiten beim Bauen vorgerendert werden; braucht `adresse`. */
-    vorrendern?: VorrendernOptionen
+    /** Which public pages are prerendered at build time; needs `url`. */
+    prerender?: PrerenderOptions
 }
 
-const FARBEN = ['primary', 'signal', 'success', 'info', 'warning', 'error']
+const COLORS = ['primary', 'signal', 'success', 'info', 'warning', 'error']
 
 /**
- * Die Vorgaben, mit denen jede Nuxt-UI-Komponente im Emberbox-Stil erscheint. Die Farbnamen zeigen
- * auf die Paletten aus `stil.css`; `primary` ist dort die Tinte, Rot bleibt Signalen und Fehlern.
+ * The defaults that make every Nuxt UI component appear in the Emberbox style. The colour names
+ * point to the palettes in `style.css`; `primary` is ink there, red is kept for signals and errors.
  */
-const VORGABEN: NuxtUIOptions['ui'] = {
+const DEFAULTS: NuxtUIOptions['ui'] = {
     colors: {
-        primary: 'stahl',
+        primary: 'steel',
         signal: 'signal',
         success: 'green',
         info: 'blue',
@@ -41,25 +41,25 @@ const VORGABEN: NuxtUIOptions['ui'] = {
     },
     formField: {
         slots: {
-            label: 'feld-label',
+            label: 'field-label',
         },
     },
 }
 
 /**
- * Wo nach benutzten Icons gesucht wird. Anders als die Vorgabe von `@nuxt/icon` auch in `.ts`- und
- * `.js`-Dateien, weil Werkzeuge Icons in Menü- und Routentabellen eintragen.
+ * Where to look for used icons. Unlike the `@nuxt/icon` default this includes `.ts` and `.js`
+ * files, because tools list icons in menu and route tables.
  */
-const ICON_SUCHE = {
+const ICON_SCAN = {
     globInclude: ['**/*.{vue,ts,tsx,js,jsx}'],
     globExclude: ['node_modules', 'dist', 'build', 'coverage', 'test', 'tests', '.*', '**/*.d.ts'],
 }
 
 /**
- * Die Icons der Komponenten aus `@emberbox/ui`. Die Suche durchläuft `node_modules` nicht, also
- * stehen sie hier fest; wer einer Komponente ein Icon gibt, trägt es hier ein.
+ * The icons of the `@emberbox/ui` components. The scan does not walk `node_modules`, so they are
+ * listed here; whoever gives a component an icon adds it here.
  */
-export const EIGENE_ICONS = [
+export const OWN_ICONS = [
     'i-lucide-check',
     'i-lucide-copy',
     'i-lucide-github',
@@ -71,14 +71,14 @@ export const EIGENE_ICONS = [
 ]
 
 /**
- * Setzt vor dem ersten Zeichnen die Klasse `dark`, damit die Seite nicht hell aufblitzt. Liest
- * denselben Schlüssel wie Nuxt UIs Farbmodus (`useDark` aus VueUse) und folgt ohne Wahl dem System.
+ * Sets the class `dark` before the first paint, so the page does not flash light. Reads the same
+ * key as Nuxt UI's colour mode (`useDark` from VueUse) and follows the system without a choice.
  */
-export const FARBMODUS_SKRIPT = `(function(){try{var w=localStorage.getItem('vueuse-color-scheme');var d=w==='dark'||((!w||w==='auto')&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}})()`
+export const COLOR_MODE_SCRIPT = `(function(){try{var w=localStorage.getItem('vueuse-color-scheme');var d=w==='dark'||((!w||w==='auto')&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d)}catch(e){}})()`
 
 /**
- * Der kurze Commit, aus dem gebaut wird. Ein Image-Build ohne `.git` reicht ihn als Umgebungsvariable
- * `COMMIT` herein; ohne beides heißt er `dev`.
+ * The short commit being built. An image build without `.git` passes it in as the environment
+ * variable `COMMIT`; without either it is `dev`.
  */
 function commit(): string {
     if (process.env.COMMIT) return process.env.COMMIT
@@ -90,56 +90,56 @@ function commit(): string {
 }
 
 /**
- * Commit und Bauzeit dieses Bauvorgangs. Einmal je Prozess bestimmt, damit Client- und SSR-Build
- * eines Werkzeugs dieselbe Fassung tragen.
+ * Commit and build time of this build. Determined once per process, so the client and SSR build of
+ * a tool carry the same build info.
  */
-const FASSUNG = {commit: commit(), gebaut: process.env.GEBAUT || new Date().toISOString()}
+const BUILD_INFO = {commit: commit(), builtAt: process.env.BUILD_TIME || new Date().toISOString()}
 
 /**
- * Richtet Nuxt UI mit dem Emberbox-Stil ein und setzt das Farbmodus-Skript in jede HTML-Seite.
- * Ersetzt in einem Werkzeug `@tailwindcss/vite`, das Nuxt UI selbst mitbringt. Icons werden aus den
- * installierten Iconify-Sammlungen gebündelt, damit der Browser nichts bei der Iconify-API nachlädt.
+ * Sets up Nuxt UI in the Emberbox style and puts the colour mode script into every HTML page.
+ * Replaces `@tailwindcss/vite` in a tool, since Nuxt UI brings it along. Icons are bundled from the
+ * installed Iconify collections, so the browser fetches nothing from the Iconify API.
  *
- * Außerdem stehen Commit und Bauzeit (`GEBAUT` aus der Umgebung oder jetzt) als `fassung` aus
- * `@emberbox/ui` bereit, und neben jedem Build liegt `fassung.json`, an der offene Seiten einen
- * neueren Build erkennen.
+ * Commit and build time (`BUILD_TIME` from the environment, or now) are available as `buildInfo`
+ * from `@emberbox/ui`, and every build gets a `build.json` by which open pages notice a newer
+ * build.
  */
-export function emberbox(optionen: EmberboxOptionen = {}): PluginOption[] {
-    const adresse = optionen.adresse?.replace(/\/+$/, '') ?? ''
-    if (optionen.vorrendern && !adresse) {
-        throw new Error('emberbox(): Zum Vorrendern fehlt die adresse.')
+export function emberbox(options: EmberboxOptions = {}): PluginOption[] {
+    const url = options.url?.replace(/\/+$/, '') ?? ''
+    if (options.prerender && !url) {
+        throw new Error('emberbox(): prerendering needs a url.')
     }
     return [
         ui({
-            router: optionen.router ?? true,
-            theme: {colors: FARBEN},
-            ui: defu(optionen.ui, VORGABEN),
-            icon: {clientBundle: {scan: ICON_SUCHE, icons: EIGENE_ICONS}},
+            router: options.router ?? true,
+            theme: {colors: COLORS},
+            ui: defu(options.ui, DEFAULTS),
+            icon: {clientBundle: {scan: ICON_SCAN, icons: OWN_ICONS}},
             scanPackages: ['@emberbox/ui'],
         }),
         {
             name: 'emberbox',
             config: () => ({
                 define: {
-                    __EMBERBOX_COMMIT__: JSON.stringify(FASSUNG.commit),
-                    __EMBERBOX_GEBAUT__: JSON.stringify(FASSUNG.gebaut),
-                    __EMBERBOX_ADRESSE__: JSON.stringify(adresse),
-                    __EMBERBOX_BILD__: JSON.stringify(optionen.logo ? '/logo-512.png' : ''),
+                    __EMBERBOX_COMMIT__: JSON.stringify(BUILD_INFO.commit),
+                    __EMBERBOX_BUILT_AT__: JSON.stringify(BUILD_INFO.builtAt),
+                    __EMBERBOX_URL__: JSON.stringify(url),
+                    __EMBERBOX_IMAGE__: JSON.stringify(options.logo ? '/logo-512.png' : ''),
                 },
                 optimizeDeps: {exclude: ['@emberbox/ui', '@iconify/vue']},
                 resolve: {dedupe: ['vue', 'vue-router', '@nuxt/ui']},
                 ssr: {noExternal: ['@emberbox/ui', '@nuxt/ui']},
             }),
             transformIndexHtml: () => [
-                {tag: 'script', children: FARBMODUS_SKRIPT, injectTo: 'head'},
+                {tag: 'script', children: COLOR_MODE_SCRIPT, injectTo: 'head'},
             ],
-            generateBundle(this, ausgabe) {
-                if (ausgabe.format === 'es' && !this.environment?.config.build.ssr) {
-                    this.emitFile({type: 'asset', fileName: 'fassung.json', source: JSON.stringify(FASSUNG)})
+            generateBundle(this, output) {
+                if (output.format === 'es' && !this.environment?.config.build.ssr) {
+                    this.emitFile({type: 'asset', fileName: 'build.json', source: JSON.stringify(BUILD_INFO)})
                 }
             },
         },
-        optionen.logo ? logoPlugin(optionen.logo) : false,
-        optionen.vorrendern && adresse ? vorrenderPlugin(optionen.vorrendern, adresse) : false,
+        options.logo ? logoPlugin(options.logo) : false,
+        options.prerender && url ? prerenderPlugin(options.prerender, url) : false,
     ]
 }

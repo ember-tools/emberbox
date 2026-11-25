@@ -1,93 +1,91 @@
 import {onBeforeUnmount, onMounted, ref} from 'vue'
 
-/** Wie ein Werkzeug den Server abfragt. */
-export interface PollingOptionen {
-    /** Abstand zwischen zwei Abfragen, solange der Server antwortet. */
-    intervallMs?: number
-    /** Längster Abstand, auf den das Warten nach Fehlern anwächst. */
-    hoechstensMs?: number
+/** How a tool polls the server. */
+export interface PollingOptions {
+    /** Delay between two requests while the server answers. */
+    intervalMs?: number
+    /** Longest delay the wait grows to after failures. */
+    maxIntervalMs?: number
 }
 
 /**
- * Fragt regelmäßig ab, solange die Seite sichtbar ist. Scheitert eine Abfrage, verdoppelt sich der
- * Abstand bis `hoechstensMs`, damit ein ausgefallener Server nicht im Sekundentakt angefragt wird;
- * die erste gelungene Abfrage setzt ihn zurück. Ein verdeckter Tab fragt nicht, und beim
- * Zurückkehren wird sofort abgefragt.
+ * Polls regularly while the page is visible. When a request fails, the delay doubles up to
+ * `maxIntervalMs`, so a server that is down is not hit every second; the first successful request
+ * resets it. A hidden tab does not poll, and coming back polls at once.
  *
- * Es läuft nie mehr als eine Abfrage zugleich, damit eine spät eintreffende ältere Antwort keine
- * neuere überschreibt. Wird während einer laufenden Abfrage erneut angestoßen, folgt genau eine
- * weitere, sobald sie fertig ist.
+ * Never more than one request runs at a time, so a late older answer cannot overwrite a newer one.
+ * A trigger during a running request queues exactly one more request after it.
  *
- * @param abfrage holt den Stand; ein Fehler gilt als verlorene Verbindung
- * @returns ob die letzte Abfrage gelang, und `jetzt`, das sofort neu abfragt
+ * @param request fetches the state; an error counts as a lost connection
+ * @returns whether the last request succeeded, and `refresh`, which polls immediately
  */
-export function usePolling(abfrage: () => Promise<unknown>, optionen: PollingOptionen = {}) {
-    const intervallMs = optionen.intervallMs ?? 2_000
-    const hoechstensMs = optionen.hoechstensMs ?? 30_000
-    const verbunden = ref(false)
-    let abstand = intervallMs
-    let zeitgeber: ReturnType<typeof setTimeout> | undefined
-    let aktiv = false
-    let laeuft = false
-    let nochmal = false
+export function usePolling(request: () => Promise<unknown>, options: PollingOptions = {}) {
+    const intervalMs = options.intervalMs ?? 2_000
+    const maxIntervalMs = options.maxIntervalMs ?? 30_000
+    const connected = ref(false)
+    let delay = intervalMs
+    let timer: ReturnType<typeof setTimeout> | undefined
+    let active = false
+    let running = false
+    let again = false
 
-    function planen(): void {
-        clearTimeout(zeitgeber)
-        if (aktiv && document.visibilityState === 'visible') {
-            zeitgeber = setTimeout(() => void runde(), abstand)
+    function schedule(): void {
+        clearTimeout(timer)
+        if (active && document.visibilityState === 'visible') {
+            timer = setTimeout(() => void poll(), delay)
         }
     }
 
-    async function runde(): Promise<void> {
-        if (laeuft) {
-            nochmal = true
+    async function poll(): Promise<void> {
+        if (running) {
+            again = true
             return
         }
-        laeuft = true
-        clearTimeout(zeitgeber)
+        running = true
+        clearTimeout(timer)
         try {
-            await abfrage()
-            verbunden.value = true
-            abstand = intervallMs
+            await request()
+            connected.value = true
+            delay = intervalMs
         } catch {
-            verbunden.value = false
-            abstand = Math.min(abstand * 2, hoechstensMs)
+            connected.value = false
+            delay = Math.min(delay * 2, maxIntervalMs)
         } finally {
-            laeuft = false
+            running = false
         }
-        if (nochmal && aktiv) {
-            nochmal = false
-            void runde()
+        if (again && active) {
+            again = false
+            void poll()
             return
         }
-        planen()
+        schedule()
     }
 
-    function sichtbar(): void {
+    function onVisibilityChange(): void {
         if (document.visibilityState === 'visible') {
-            void runde()
+            void poll()
         } else {
-            clearTimeout(zeitgeber)
+            clearTimeout(timer)
         }
     }
 
-    function jetzt(): void {
-        abstand = intervallMs
-        void runde()
+    function refresh(): void {
+        delay = intervalMs
+        void poll()
     }
 
     onMounted(() => {
-        aktiv = true
-        document.addEventListener('visibilitychange', sichtbar)
-        void runde()
+        active = true
+        document.addEventListener('visibilitychange', onVisibilityChange)
+        void poll()
     })
 
     onBeforeUnmount(() => {
-        aktiv = false
-        nochmal = false
-        clearTimeout(zeitgeber)
-        document.removeEventListener('visibilitychange', sichtbar)
+        active = false
+        again = false
+        clearTimeout(timer)
+        document.removeEventListener('visibilitychange', onVisibilityChange)
     })
 
-    return {verbunden, jetzt}
+    return {connected, refresh}
 }

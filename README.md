@@ -15,7 +15,7 @@ Requires [Nix](https://nixos.org) with direnv; `shell.nix` provides Node.
 
 ```sh
 ./toolchain.sh install
-./toolchain.sh hub-dev      # pattern page at http://localhost:5173/muster
+./toolchain.sh hub-dev      # pattern page at http://localhost:5173/pattern
 ./toolchain.sh verify       # everything CI checks
 ```
 
@@ -31,8 +31,8 @@ export default defineConfig({plugins: [vue(), emberbox()]})
 ```
 
 ```css
-/* stil.css – brings Tailwind and Nuxt UI along */
-@import "@emberbox/ui/stil.css";
+/* style.css – brings Tailwind and Nuxt UI along */
+@import "@emberbox/ui/style.css";
 ```
 
 ```ts
@@ -45,74 +45,76 @@ createApp(App).use(router).use(emberboxUi).mount('#app')
 ```vue
 <!-- App.vue -->
 <script setup lang="ts">
-import {AppFuss, AppKopf, EmberboxApp} from '@emberbox/ui'
+import {AppFooter, AppHeader, EmberboxApp} from '@emberbox/ui'
 </script>
 
 <template>
   <EmberboxApp>
-    <AppKopf name="Calltaker" untertitel="Notrufabfrage üben"/>
+    <AppHeader name="Calltaker" subtitle="Notrufabfrage üben"/>
     <RouterView/>
-    <AppFuss werkzeug="Calltaker" quelle="https://github.com/rainbowdashlabs/calltaker"
-             lizenz="AGPL-3.0" hilfe="/hilfe"/>
+    <AppFooter tool="Calltaker" source="https://github.com/rainbowdashlabs/calltaker"
+               license="AGPL-3.0" help="/hilfe"/>
   </EmberboxApp>
 </template>
 ```
 
 `EmberboxApp` sets Nuxt UI to German and shows a banner as soon as a newer build is served. Tools
-without vue-router use `emberbox({router: false})`.
+without vue-router use `emberbox({router: false})`. `AppFooter` links back to the Emberbox hub;
+`backlink: false` turns that off. The tool's tsconfig needs the `vite/client` types, since the
+library ships as source and imports its logo with `?url`.
 
-The commit and build time are available as `fassung` from `@emberbox/ui` and appear in the footer.
+The commit and build time are available as `buildInfo` from `@emberbox/ui` and appear in the footer.
 `emberbox()` reads them from `git` or, in an image build without `.git`, from the environment
-variables `COMMIT` and `GEBAUT`:
+variables `COMMIT` and `BUILD_TIME`:
 
 ```dockerfile
 ARG COMMIT=dev
-ARG GEBAUT
-RUN COMMIT=$COMMIT GEBAUT=$GEBAUT npm run build
+ARG BUILD_TIME
+RUN COMMIT=$COMMIT BUILD_TIME=$BUILD_TIME npm run build
 ```
 
-Every build contains `fassung.json`. The backend serves it at the root without caching
+Every build contains `build.json`. The backend serves it at the root without caching
 (`Cache-Control: no-store`), so open pages notice a new build.
 
-Further building blocks: `CodeAnzeige`, `useRueckfrage`, `usePolling` and the help components
-`HilfeSeite`, `HilfeAbschnitt`, `HilfeThema`, `HilfeMockup`. The pattern page shows all of them.
+Further building blocks: `CodeDisplay`, `useConfirm`, `usePolling` and the help components
+`HelpPage`, `HelpSection`, `HelpTopic`, `HelpMockup`. The pattern page shows all of them.
 
 ## Logo, SEO and prerendering
 
 ```ts
 // vite.config.ts
 emberbox({
-    adresse: 'https://calltaker.emberbox.app',
+    url: 'https://calltaker.emberbox.app',
     logo: 'calltaker',
-    vorrendern: {eintrag: 'src/vorrendern.ts', pfade: ['/', '/hilfe']},
+    prerender: {entry: 'src/prerender.ts', paths: ['/', '/hilfe']},
 })
 ```
 
 - `logo` puts `favicon.svg`, `apple-touch-icon.png` and `logo-512.png` at the root and links them;
-  `logo-512.png` is also the default preview image. `AppKopf` shows the logo with
+  `logo-512.png` is also the default preview image. `AppHeader` shows the logo with
   `logo="/favicon.svg"`.
-- `useSeite({titel, beschreibung, pfad, indexieren, bild, daten})` sets a page's title,
-  description, canonical URL, OpenGraph and `robots`; `werkzeugDaten(...)` provides matching
+- `usePage({title, description, path, index, image, structuredData})` sets a page's title,
+  description, canonical URL, OpenGraph and `robots`; `webApplicationData(...)` provides matching
   JSON-LD.
-- `vorrendern` renders the public pages at build time to `dist/seiten/<path>/index.html` and
+- `prerender` renders the public pages at build time to `dist/pages/<path>/index.html` and
   writes `sitemap.xml` and `robots.txt`. `dist/index.html` stays the empty shell for all other
-  routes. The backend serves `seiten/index.html` for `/`, `seiten/hilfe/index.html` for `/hilfe`,
+  routes. The backend serves `pages/index.html` for `/`, `pages/hilfe/index.html` for `/hilfe`,
   and `index.html` otherwise.
 
 ```ts
-// src/vorrendern.ts
-import {seiteRendern} from '@emberbox/ui/vorrendern'
+// src/prerender.ts
+import {renderPage} from '@emberbox/ui/prerender'
 
-export async function render(pfad: string, vorlage: string): Promise<string> {
-    const router = routerErzeugen(createMemoryHistory())
+export async function render(path: string, template: string): Promise<string> {
+    const router = createAppRouter(createMemoryHistory())
     const app = createSSRApp(App).use(router)
-    await router.push(pfad)
+    await router.push(path)
     await router.isReady()
-    return seiteRendern(app, vorlage)
+    return renderPage(app, template)
 }
 ```
 
-In the browser, `appErzeugen(App)` creates the app so that it takes over prerendered HTML; wait for
+In the browser, `createToolApp(App)` creates the app so that it takes over prerendered HTML; wait for
 `router.isReady()` before `mount`. Prerendered pages must not touch `window` or `document` during
 setup, only in `onMounted`. `probe/` holds a complete example.
 
@@ -131,13 +133,13 @@ cd ../tool/frontend && npm install ../../emberbox/emberbox-ui-<version>.tgz
 ## Hub
 
 The hub in `hub/` is fully prerendered and runs as a static site in a Caddy container behind
-Traefik. The tools are listed in `hub/src/werkzeuge.ts`; a new tool is one more entry there. The
+Traefik. The tools are listed in `hub/src/tools.ts`; a new tool is one more entry there. The
 imprint and privacy policy cover all tools; the provider details live in
-`hub/src/rechtliches.ts`.
+`hub/src/legal.ts`.
 
 ```sh
 ./toolchain.sh hub-image                       # build the image locally
-docker run --rm -p 8080:80 emberbox-hub:lokal   # view at http://localhost:8080
+docker run --rm -p 8080:80 emberbox-hub:local   # view at http://localhost:8080
 ```
 
 On `main`, CI builds the image `ghcr.io/rainbowdashlabs/emberbox-hub`. `hub/compose.yml` runs it
