@@ -34,6 +34,12 @@ export {
     markSymbolTree, unitSymbol, unitSymbolTree,
     type MarkKind, type Organisation, type SvgElement, type SymbolShape, type SymbolSpec, type UnitSize,
 } from './symbols/tactical'
+export {
+    BASIC_FORMS, DRIVES, FLIGHTS, ORGANISATION_COLOURS, SIGN_ORGANISATIONS, SIGN_SIZES, SUPPLEMENTS, VEHICLE_BODIES, tacticalSign,
+    tacticalSignTree, type BasicForm, type Drive, type Flight, type SignOrganisation, type SignSize, type SignStyle, type Supplement,
+    type TacticalSignSpec, type VehicleBody,
+} from './symbols/signs'
+export {CATALOG_SOURCE, TACTICAL_SIGN_CATALOG, catalogSignTree, type CatalogEntry} from './symbols/catalog'
 
 /**
  * Vue plugin that installs Nuxt UI in the Emberbox style. Icons come only from the bundled set; a

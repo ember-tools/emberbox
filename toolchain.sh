@@ -13,6 +13,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
+SIGN_RECOMMENDATIONS_URL="https://lv-saarland.drk.de/fileadmin/user_upload/Taktische_Zeichen_im_Bev%C3%B6lkerungsschutz_Druck_A5.pdf"
+
 run() {
     if [ -f "$ROOT/.envrc" ] && command -v direnv >/dev/null 2>&1; then
         direnv exec "$ROOT" "$@"
@@ -38,6 +40,8 @@ Usage: ./toolchain.sh <command> [args...]
   hub-typecheck   vue-tsc for the hub
   hub-build       Type check and production build of the hub
   hub-image       Build the hub container image locally as emberbox-hub:local
+  sign-references Download the BBK recommendations on tactical signs into .references/ (ignored) and
+                  render the pages the test bench at /pattern/signs cites, to check the drawings
   lint-test       Tests of @emberbox/lint
   lint            emberbox-lint in the lint package, the library and the hub
   lint-probe      Pack @emberbox/lint, install it into the project in probe-lint/, run every linter
@@ -100,6 +104,21 @@ case "$command" in
     hub-dev) "$0" ui-build && run npm run -w @emberbox/hub dev -- "$@" ;;
     hub-typecheck) run npm run -w @emberbox/hub typecheck ;;
     hub-build) run npm run -w @emberbox/hub build ;;
+    sign-references)
+        mkdir -p "$ROOT/.references"
+        pdf="$ROOT/.references/taktische-zeichen-2024.pdf"
+        if [ ! -f "$pdf" ]; then
+            curl -fsSL -o "$pdf.part" "$SIGN_RECOMMENDATIONS_URL"
+            mv "$pdf.part" "$pdf"
+        fi
+        pages=("$@")
+        [ ${#pages[@]} -gt 0 ] || pages=(14 15 16 17 20 21 32 33 34 37)
+        for page in "${pages[@]}"; do
+            [[ "$page" =~ ^[0-9]+$ ]] || { echo "Not a page number: $page" >&2; exit 2; }
+            run pdftoppm -f $((page + 2)) -l $((page + 2)) -r 110 -singlefile -png "$pdf" "$ROOT/.references/page-$page"
+        done
+        echo "Pages are in $ROOT/.references"
+        ;;
     hub-image) docker build -f hub/Dockerfile --build-arg COMMIT="$(git rev-parse --short HEAD)" -t emberbox-hub:local . ;;
     lint-test) run npm run -w @emberbox/lint test ;;
     lint)

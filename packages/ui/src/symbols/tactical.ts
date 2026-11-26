@@ -11,6 +11,10 @@
  * image) for it to apply.
  */
 
+import {canvas, element, label, renderSvg, type Attributes, type SvgElement} from './svg'
+
+export {SYMBOL_HEIGHT, SYMBOL_WIDTH, escapeSvg, renderSvg, type SvgElement} from './svg'
+
 /** The organisation a unit belongs to, which sets its colours. */
 export type Organisation = 'fire' | 'medical'
 
@@ -43,36 +47,15 @@ export interface SymbolSpec {
     size?: UnitSize
 }
 
-/** One SVG element of a symbol, with its attributes and either child elements or text. */
-export interface SvgElement {
-    tag: string
-    attributes: Record<string, string | number>
-    children?: SvgElement[]
-    text?: string
-}
-
-/** The width of every symbol's canvas. */
-export const SYMBOL_WIDTH = 120
-/** The height of every symbol's canvas. */
-export const SYMBOL_HEIGHT = 80
-
 const RED = 'var(--color-signal-500)'
 const WHITE = 'white'
 const STROKE = 3
-const MAX_TEXT_WIDTH = 86
 const SQUAD_TEXT_WIDTH = 62
 
 interface Colours {
     fill: string
     line: string
     text: string
-}
-
-type Attributes = SvgElement['attributes']
-
-/** An SVG element without children. */
-function element(tag: string, attributes: Attributes): SvgElement {
-    return {tag, attributes}
 }
 
 /** The attributes of an outlined form. */
@@ -90,42 +73,6 @@ function colours(organisation: Organisation): Colours {
     return organisation === 'medical'
         ? {fill: WHITE, line: RED, text: RED}
         : {fill: RED, line: RED, text: WHITE}
-}
-
-/** Escapes text for use inside SVG or HTML markup. */
-export function escapeSvg(text: string): string {
-    return text.replace(/[&<>"']/g, character => `&#${character.charCodeAt(0)};`)
-}
-
-/**
- * Writes a symbol tree as SVG markup, escaping every attribute value and text. Tag and attribute
- * names are written as they are, so the tree must be built by code, as the trees of this module are.
- */
-export function renderSvg(node: SvgElement): string {
-    const attributes = Object.entries(node.attributes)
-        .map(([name, value]) => ` ${name}="${escapeSvg(String(value))}"`)
-        .join('')
-    const content = node.text !== undefined
-        ? escapeSvg(node.text)
-        : (node.children ?? []).map(renderSvg).join('')
-    return content ? `<${node.tag}${attributes}>${content}</${node.tag}>` : `<${node.tag}${attributes}/>`
-}
-
-/** The writing inside a symbol, squeezed to fit when it is long. */
-function label(text: string, x: number, y: number, colour: string, maxWidth = MAX_TEXT_WIDTH): SvgElement {
-    const size = text.length > 8 ? 17 : 22
-    const squeeze: Attributes = text.length * size * 0.5 > maxWidth
-        ? {textLength: maxWidth, lengthAdjust: 'spacingAndGlyphs'}
-        : {}
-    return {
-        tag: 'text',
-        attributes: {
-            x, y, fill: colour, 'font-size': size, 'font-weight': 700,
-            'font-family': 'Barlow Condensed, Barlow, sans-serif', 'text-anchor': 'middle',
-            'dominant-baseline': 'central', ...squeeze,
-        },
-        text,
-    }
 }
 
 /** Where the dots of each unit size sit above the symbol: one, two stacked, two apart, three in a row. */
@@ -220,14 +167,3 @@ export function markSymbol(kind: MarkKind): string {
     return renderSvg(markSymbolTree(kind))
 }
 
-/** The SVG element of the common canvas around a symbol's content. */
-function canvas(children: SvgElement[]): SvgElement {
-    return {
-        tag: 'svg',
-        attributes: {
-            xmlns: 'http://www.w3.org/2000/svg', viewBox: `0 0 ${SYMBOL_WIDTH} ${SYMBOL_HEIGHT}`,
-            width: SYMBOL_WIDTH, height: SYMBOL_HEIGHT,
-        },
-        children,
-    }
-}
