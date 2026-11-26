@@ -17,6 +17,7 @@ const TOOLS = {
     calltaker: 'headset',
     planspiel: 'map-pinned',
     lernkarten: 'graduation-cap',
+    foerderstrecke: 'droplets',
 }
 const SIGNAL = '#d5271b'
 const PNG_SIZES = [180, 192, 512]
