@@ -1,4 +1,5 @@
 import {describe, expect, it} from 'vitest'
+import {ABILITIES} from './abilities'
 import {TACTICAL_SIGN_CATALOG, catalogSignTree} from './catalog'
 import {
     BASIC_FORMS, DRIVES, FLIGHTS, ORGANISATION_COLOURS, SIGN_ORGANISATIONS, SIGN_SIZES, SUPPLEMENTS, VEHICLE_BODIES,
@@ -134,12 +135,12 @@ describe('catalogue', () => {
         const ids = TACTICAL_SIGN_CATALOG.map(entry => entry.id)
         expect(new Set(ids).size).toBe(ids.length)
         for (const entry of TACTICAL_SIGN_CATALOG) {
-            expect(entry.number, entry.id).toMatch(entry.recommended ? /^[1-5](\.\d+)+$/ : /^W\.\d+$/)
+            expect(entry.number, entry.id).toMatch(entry.recommended ? /^([1-5]|C)(\.\d+)+$/ : /^W\.\d+$/)
             expect(entry.page !== undefined, entry.id).toBe(entry.recommended)
         }
     })
 
-    it('covers chapters 1, 2, 3 and 5.1, 5.4 and 5.5 of the recommendations', () => {
+    it('covers chapters 1 to 4, 5.1, 5.4, 5.5 and annex C of the recommendations', () => {
         const numbers = new Set(TACTICAL_SIGN_CATALOG.map(entry => entry.number))
         const expected = [
             ...Array.from({length: 14}, (_, n) => `1.${n + 1}`),
@@ -151,11 +152,91 @@ describe('catalogue', () => {
             ...Array.from({length: 4}, (_, n) => `5.1.3.${n + 1}`),
             ...Array.from({length: 3}, (_, n) => `5.1.4.${n + 1}`),
             '5.4.1', '5.4.2', '5.4.3', '5.4.4', '5.5.1', '5.5.2', '5.5.3',
+            ...Object.values(ABILITIES).map(ability => ability.number),
+            ...Array.from({length: 15}, (_, n) => `C.1.${n + 1}`),
+            ...Array.from({length: 31}, (_, n) => `C.2.${n + 1}`),
         ]
         for (const number of expected) expect(numbers.has(number), number).toBe(true)
     })
 
     it('keeps the drawing of every entry', () => {
         for (const entry of TACTICAL_SIGN_CATALOG) expect(renderSvg(catalogSignTree(entry))).toMatchSnapshot(entry.id)
+    })
+})
+
+describe('abilities', () => {
+    /** The ability groups of a sign with their offset and scale. */
+    function boxes(spec: TacticalSignSpec): {x: number, y: number, sx: number, sy: number, node: SvgElement}[] {
+        return parts(spec).filter(part => part.tag === 'g' && String(part.attributes.transform ?? '').startsWith('translate')).map(node => {
+            const [, x, y, sx, sy] = /translate\((\S+) (\S+)\) scale\((\S+)(?: (\S+))?\)/.exec(String(node.attributes.transform))!
+            return {x: Number(x), y: Number(y), sx: Number(sx), sy: Number(sy ?? sx), node}
+        })
+    }
+
+    it('stacks several abilities from the bottom up, the main one lowest', () => {
+        const [main, second] = boxes({form: 'formation', abilities: ['medical', 'care']})
+        expect(main!.y).toBeGreaterThan(second!.y)
+    })
+
+    it('stretches firefighting over the whole room of the form, below a designation if there is one', () => {
+        const [box] = boxes({form: 'formation', organisation: 'fire', abilities: ['firefighting']})
+        expect(box!.x).toBe(16)
+        expect(box!.x + 100 * box!.sx).toBeCloseTo(104, 5)
+        expect(box!.sx).not.toBeCloseTo(box!.sy, 2)
+        const [below] = boxes({form: 'formation', organisation: 'fire', abilities: ['firefighting'], designation: 'TSF'})
+        expect(below!.x + 100 * below!.sx).toBeCloseTo(104, 5)
+        expect(below!.y).toBeGreaterThan(box!.y)
+    })
+
+    it('keeps the dots of a stretched CBRN cross round', () => {
+        const dots = parts({form: 'formation', organisation: 'fire', abilities: ['cbrn']}).filter(part => part.tag === 'circle')
+        expect(dots).toHaveLength(2)
+        for (const dot of dots) expect(dot.attributes.r).toBeGreaterThan(0)
+    })
+
+    it('keeps abilities and the designation clear of the command and logistics bars', () => {
+        const spec: TacticalSignSpec = {form: 'land-vehicle', organisation: 'fire', supplements: ['command', 'logistics'], designation: 'ELW 1', abilities: ['power']}
+        const [box] = boxes(spec)
+        const text = parts(spec).find(part => part.text === 'ELW 1')!
+        expect(Number(text.attributes.y)).toBeGreaterThan(32)
+        expect(box!.y).toBeGreaterThan(Number(text.attributes.y))
+        expect(box!.y + 60 * box!.sy).toBeLessThanOrEqual(60 - 12 + 0.1)
+    })
+
+    it('draws strokes as heavy as the outline at any scale', () => {
+        for (const spec of [{form: 'formation', abilities: ['medical']}, {form: 'formation', abilities: ['medical', 'care', 'ladder']}] as TacticalSignSpec[]) {
+            for (const box of boxes(spec)) {
+                const stroke = box.node.children!.find(part => part.tag === 'path')!.attributes['stroke-width']
+                expect(Number(stroke) * box.sx).toBeCloseTo(2.5, 2)
+            }
+        }
+    })
+
+    it('inks abilities black on fire red, white on THW blue, red in outline and black in black and white', () => {
+        const ink = (organisation: 'fire' | 'thw', style?: 'outline' | 'mono') =>
+            boxes({form: 'formation', organisation, style, abilities: ['medical']})[0]!.node.children![0]!.attributes.stroke
+        expect(ink('fire')).toBe('#000000')
+        expect(ink('thw')).toBe('#FFFFFF')
+        expect(ink('fire', 'outline')).toBe('#FA321E')
+        expect(ink('thw', 'mono')).toBe('#000000')
+    })
+
+    it('writes a designation in the upper left corner', () => {
+        const text = parts({form: 'land-vehicle', organisation: 'fire', designation: 'TSF'}).find(part => part.text === 'TSF')!
+        expect(Number(text.attributes.x)).toBeLessThan(30)
+        expect(Number(text.attributes.y)).toBeLessThan(30)
+    })
+
+    it('has a number, name, page and drawing for every ability of chapter 4', () => {
+        const perSection = Object.values(ABILITIES).reduce<Record<string, number>>((counts, ability) => {
+            const section = ability.number.split('.').slice(0, 2).join('.')
+            return {...counts, [section]: (counts[section] ?? 0) + 1}
+        }, {})
+        expect(perSection).toEqual({'4.1': 8, '4.2': 5, '4.3': 6, '4.4': 3, '4.5': 8, '4.6': 6, '4.7': 28, '4.8': 16, '4.9': 1, '4.10': 7})
+        for (const [name, ability] of Object.entries(ABILITIES)) {
+            expect(ability.page, name).toBeGreaterThanOrEqual(22)
+            expect(ability.page, name).toBeLessThanOrEqual(31)
+            expect(ability.parts.length, name).toBeGreaterThan(0)
+        }
     })
 })

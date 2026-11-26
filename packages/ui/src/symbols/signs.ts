@@ -16,7 +16,8 @@
  * marks sit inside the roof, since the canvas has no room above it.
  */
 
-import {canvas, element, group, label, renderSvg, type SvgElement} from './svg'
+import {ABILITIES, type Ability, type AbilityName, type AbilityPart} from './abilities'
+import {SIGN_FONT, canvas, element, group, label, renderSvg, type SvgElement} from './svg'
 
 /** The basic forms of chapter 1, in its order. */
 export const BASIC_FORMS = [
@@ -81,6 +82,10 @@ export interface TacticalSignSpec {
     drive?: Drive
     body?: VehicleBody
     flight?: Flight
+    /** Abilities of chapter 4 drawn inside the form, the main one first; they stack from the bottom up (6.1). */
+    abilities?: readonly AbilityName[]
+    /** A short designation in the upper left corner (field A), such as "ELW 1", as annex C shows it. */
+    designation?: string
     /** Writing inside the form, such as a function or a vehicle name. */
     text?: string
     /** Shows the organisation's short name, which chapter 2 asks for whenever colour is missing. */
@@ -89,7 +94,7 @@ export interface TacticalSignSpec {
 
 /** The colour, its writing colour and short name of each organisation, after chapter 2 and annex O. */
 export const ORGANISATION_COLOURS: Readonly<Record<SignOrganisation, Readonly<{fill: string, text: string, abbreviation: string}>>> = {
-    fire: {fill: '#FA321E', text: '#FFFFFF', abbreviation: 'Fw'},
+    fire: {fill: '#FA321E', text: '#000000', abbreviation: 'Fw'},
     aid: {fill: '#FFFFFF', text: '#000000', abbreviation: 'HiOrg'},
     thw: {fill: '#003399', text: '#FFFFFF', abbreviation: 'THW'},
     command: {fill: '#FAFA00', text: '#000000', abbreviation: ''},
@@ -210,6 +215,73 @@ function sizeMark(size: SignSize, above: number): SvgElement[] {
         case 'association-1': return [bar(60, above - 3)]
         case 'association-2': return [bar(52, above - 3), bar(68, above - 3)]
         case 'association-3': return [bar(48, above - 3), bar(60, above - 3), bar(72, above - 3)]
+    }
+}
+
+const ABILITY_STROKE = 2.5
+
+/** One part of an ability, drawn in its 100 × 60 box; `width` is the stroke width in that box. */
+function abilityPart(part: AbilityPart, colour: string, width: number): SvgElement {
+    const stroke = {stroke: colour, 'stroke-width': round(width), 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}
+    if ('text' in part) {
+        return {tag: 'text', attributes: {x: part.x, y: part.y, fill: colour, 'font-size': part.size, ...SIGN_FONT,
+            'text-anchor': 'middle', 'dominant-baseline': 'central'}, text: part.text}
+    }
+    const fill = part.filled ? colour : 'none'
+    if ('circle' in part) return element('circle', {cx: part.circle[0], cy: part.circle[1], r: part.circle[2], fill, ...stroke})
+    return element('path', {d: part.d, fill, ...stroke, ...(part.width ? {'stroke-width': round(part.width * width / ABILITY_STROKE)} : {})})
+}
+
+/** The room inside a form that abilities may take, clear of the designation and the command and logistics bars. */
+function abilityRoom(spec: TacticalSignSpec, form: Layout): {left: number, top: number, width: number, height: number} {
+    const supplements = spec.supplements ?? []
+    const top = form.top + (supplements.includes('command') ? 12 : 4) + (spec.designation ? 10 : 0)
+    const bottom = form.bottom - (supplements.includes('logistics') ? 12 : 4)
+    return {left: form.left + 6, top, width: form.right - form.left - 12, height: bottom - top}
+}
+
+/**
+ * The abilities inside a form: each gets an equal slice of the room, the first (main) one at the
+ * bottom, and is scaled evenly into it. A single ability that stretches spans the whole room
+ * instead, below a designation if there is one, as annex C draws it; its paths are stretched, its
+ * dots stay round.
+ * Stroke widths are set in each box so the lines keep the weight of the form's outline.
+ */
+function abilityMarks(spec: TacticalSignSpec, form: Layout, colour: string): SvgElement[] {
+    const names = spec.abilities ?? []
+    const room = abilityRoom(spec, form)
+    const only = names.length === 1 ? (ABILITIES[names[0]!] as Ability) : undefined
+    if (only?.stretch) {
+        const sx = room.width / 100
+        const sy = room.height / 60
+        const lines = only.parts.filter(part => !('circle' in part)).map(part => abilityPart(part, colour, ABILITY_STROKE / Math.min(sx, sy)))
+        const dots = only.parts.flatMap(part => 'circle' in part
+            ? [element('circle', {cx: round(room.left + part.circle[0] * sx), cy: round(room.top + part.circle[1] * sy),
+                r: round(part.circle[2] * Math.min(sx, sy)), fill: part.filled ? colour : 'none', stroke: colour, 'stroke-width': ABILITY_STROKE})]
+            : [])
+        return [group(lines, {transform: `translate(${round(room.left)} ${round(room.top)}) scale(${round(sx)} ${round(sy)})`}), ...dots]
+    }
+    const slot = room.height / names.length
+    return names.map((name, index) => {
+        const scale = Math.min(room.width / 100, slot / 60)
+        const x = room.left + (room.width - 100 * scale) / 2
+        const y = room.top + slot * (names.length - 1 - index) + (slot - 60 * scale) / 2
+        const parts = ABILITIES[name].parts.map(part => abilityPart(part, colour, ABILITY_STROKE / scale))
+        return group(parts, {transform: `translate(${round(x)} ${round(y)}) scale(${round(scale)})`})
+    })
+}
+
+function round(value: number): number {
+    return Math.round(value * 1000) / 1000
+}
+
+/** The designation in the upper left corner of a form (field A), below a command bar if there is one. */
+function designation(spec: TacticalSignSpec, text: string, form: Layout, colour: string): SvgElement {
+    const below = (spec.supplements ?? []).includes('command') ? 12 : 0
+    return {
+        tag: 'text',
+        attributes: {x: form.left + 5, y: form.top + 8 + below, fill: colour, 'font-size': 10, ...SIGN_FONT, 'dominant-baseline': 'central'},
+        text,
     }
 }
 
@@ -337,6 +409,8 @@ export function tacticalSignTree(spec: TacticalSignSpec): SvgElement {
     if (spec.flight) parts.push(...flightMarks(spec.flight, form, colours.line))
     for (const kind of supplements) parts.push(...supplement(kind, form, colours.line))
     if (spec.size) parts.push(...sizeMark(spec.size, form.top))
+    if (spec.abilities?.length) parts.push(...abilityMarks(spec, form, colours.text))
+    if (spec.designation) parts.push(designation(spec, spec.designation, form, colours.text))
     if (spec.text) parts.push(label(spec.text, 60, form.textY, colours.text, form.textWidth))
     const short = spec.abbreviation && spec.organisation ? ORGANISATION_COLOURS[spec.organisation].abbreviation : ''
     if (short) parts.push(label(short, form.short.x, form.short.y, form.short.inside ? colours.text : BLACK, 24, 10))

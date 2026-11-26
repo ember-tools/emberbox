@@ -1,3 +1,4 @@
+import {ABILITIES, type AbilityName} from './abilities'
 import {tacticalSignTree, type TacticalSignSpec} from './signs'
 import type {SvgElement} from './svg'
 import {markSymbolTree, type MarkKind} from './tactical'
@@ -41,9 +42,11 @@ export function catalogSignTree(entry: CatalogEntry): SvgElement {
 const FIRE = {organisation: 'fire'} as const
 
 /**
- * The signs of chapters 1, 2, 3 and 5.1, 5.4 and 5.5 of the recommendations, in their order, then
- * the library's own water supply marks. Chapter 1 is drawn black on white as printed; colours are
- * shown on a tactical formation, supplements, vehicles and sizes in fire service red.
+ * The signs of chapters 1 to 4, 5.1, 5.4, 5.5 and annex C of the recommendations, in their order,
+ * then the library's own water supply marks. Chapter 1 is drawn black on white as printed, chapter 4
+ * on a plain formation; colours are shown on a tactical formation, supplements, vehicles and sizes
+ * in fire service red. Letters that annex C writes inside a symbol ("P", "G", "ATF") stand in field A
+ * here, and the flying line of C.1.13 sits under the form as in 5.1.4.
  */
 export const TACTICAL_SIGN_CATALOG: readonly CatalogEntry[] = [
     entry('1.1', 'Taktische Formation', 14, {form: 'formation'}),
@@ -75,6 +78,7 @@ export const TACTICAL_SIGN_CATALOG: readonly CatalogEntry[] = [
     entry('3.5', 'Zweirad, Fahrrad', 20, {form: 'formation', ...FIRE, supplements: ['bicycle']}),
     entry('3.6', 'Zweirad, Kraftrad', 21, {form: 'formation', ...FIRE, supplements: ['motorcycle']}),
     entry('3.7', 'Temporär ortsfeste Struktur (mit festem Dach)', 21, {form: 'place', ...FIRE, supplements: ['roof']}),
+    ...Object.entries(ABILITIES).map(([name, ability]) => entry(ability.number, ability.name, ability.page, {form: 'formation', abilities: [name as AbilityName]})),
     entry('5.1.1', 'Fahrzeug, ungeschützt', 32, {form: 'land-vehicle', ...FIRE}, '5.1.1-unprotected'),
     entry('5.1.2', 'Fahrzeug, geschützt', 32, {form: 'land-vehicle', ...FIRE, protected: true}, '5.1.2-protected'),
     entry('5.1.1.1', 'Kraftfahrzeug, straßenfähig (Kategorie 1)', 32, {form: 'land-vehicle', ...FIRE, drive: 'road'}),
@@ -105,6 +109,52 @@ export const TACTICAL_SIGN_CATALOG: readonly CatalogEntry[] = [
     entry('5.5.1', 'Bereitschaft (Verband I)', 37, {form: 'formation', ...FIRE, size: 'association-1'}),
     entry('5.5.2', 'Abteilung (Verband II)', 37, {form: 'formation', ...FIRE, size: 'association-2'}),
     entry('5.5.3', 'Großverband (Verband III)', 37, {form: 'formation', ...FIRE, size: 'association-3'}),
+    entry('C.1.1', 'Löschstaffel (Staffellöschfahrzeug)', 71, {form: 'formation', ...FIRE, size: 'section', abilities: ['firefighting']}),
+    entry('C.1.2', 'Löschgruppe (Löschgruppenfahrzeug)', 71, {form: 'formation', ...FIRE, size: 'group', abilities: ['firefighting']}),
+    entry('C.1.3', 'Löschzug einer Feuerwehr', 71, {form: 'formation', ...FIRE, size: 'platoon', abilities: ['firefighting']}),
+    entry('C.1.4', 'Rüstzug einer Feuerwehr', 71, {form: 'formation', ...FIRE, size: 'platoon', abilities: ['technical-rescue']}),
+    entry('C.1.5', 'Fachzug', 71, {form: 'formation', ...FIRE, size: 'platoon', designation: 'FZ-'}),
+    entry('C.1.6', 'Fachdienst Brandschutz', 71, {form: 'formation', ...FIRE, size: 'association-1', abilities: ['firefighting'], designation: 'FD'}),
+    entry('C.1.7', 'CBRN-Erkundungstrupp (CBRN-ErkKW)', 71, {form: 'formation', ...FIRE, size: 'squad', abilities: ['cbrn-measuring']}),
+    entry('C.1.8', 'Staffel Dekontamination von Personal (GW-Dekon P)', 71, {form: 'formation', ...FIRE, size: 'section', abilities: ['decontamination'], designation: 'P'}),
+    entry('C.1.9', 'ABC-Erkundungsgruppe einer Feuerwehr', 71, {form: 'formation', ...FIRE, size: 'group', abilities: ['cbrn-measuring']}),
+    entry('C.1.10', 'Dekontaminationsgruppe Gerät einer Feuerwehr', 71, {form: 'formation', ...FIRE, size: 'group', abilities: ['decontamination'], designation: 'G'}),
+    entry('C.1.11', 'Gefahrstoffzug/ABC-Zug/CBRN-Zug einer Feuerwehr', 72, {form: 'formation', ...FIRE, size: 'platoon', abilities: ['cbrn']}),
+    entry('C.1.12', 'Analytische Task Force (ATF)', 72, {form: 'formation', ...FIRE, size: 'platoon', abilities: ['cbrn-measuring'], designation: 'ATF'}),
+    entry('C.1.13', 'Flugdrohnentrupp einer Feuerwehr', 72, {form: 'formation', ...FIRE, size: 'squad', supplements: ['uncrewed'], flight: 'flying'}),
+    entry('C.1.14', 'Drohnentrupp einer Feuerwehr (allgemein)', 72, {form: 'formation', ...FIRE, size: 'squad', supplements: ['uncrewed']}),
+    entry('C.1.15', 'Tauchergruppe einer Feuerwehr', 72, {form: 'formation', ...FIRE, size: 'group', abilities: ['water-rescue']}),
+    entry('C.2.1', 'Kommandowagen', 72, {form: 'land-vehicle', ...FIRE, drive: 'road', supplements: ['command'], designation: 'KdoW'}),
+    entry('C.2.2', 'Einsatzleitwagen 1', 72, {form: 'land-vehicle', ...FIRE, drive: 'road', supplements: ['command'], designation: 'ELW 1'}),
+    entry('C.2.3', 'Einsatzleitwagen 2', 72, {form: 'land-vehicle', ...FIRE, drive: 'road', supplements: ['command'], designation: 'ELW 2'}),
+    entry('C.2.4', 'Tragkraftspritzenfahrzeug', 72, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['firefighting'], designation: 'TSF'}),
+    entry('C.2.5', 'Tragkraftspritzenfahrzeug mit Wasser', 72, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['firefighting'], designation: 'TSF-W'}),
+    entry('C.2.6', 'Kleinlöschfahrzeug', 73, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['firefighting'], designation: 'KLF'}),
+    entry('C.2.7', 'Mittleres Löschfahrzeug', 73, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['firefighting'], designation: 'MLF'}),
+    entry('C.2.8', '(Hilfeleistungs-)Löschfahrzeug 10', 73, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['firefighting'], designation: '(H)LF 10'}),
+    entry('C.2.9', '(Hilfeleistungs-)Löschfahrzeug 20', 73, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['firefighting'], designation: '(H)LF 20'}),
+    entry('C.2.10', 'Löschgruppenfahrzeug 20 Katastrophenschutz', 73, {form: 'land-vehicle', ...FIRE, drive: 'offroad', abilities: ['firefighting'], designation: 'LF 20 KatS'}),
+    entry('C.2.11', 'Tanklöschfahrzeug 2.000', 73, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['firefighting'], designation: 'TLF 2.000'}),
+    entry('C.2.12', 'Tanklöschfahrzeug 3.000', 73, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['firefighting'], designation: 'TLF 3.000'}),
+    entry('C.2.13', 'Tanklöschfahrzeug 4.000', 73, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['firefighting'], designation: 'TLF 4.000'}),
+    entry('C.2.14', 'Automatikdrehleiter mit Rettungskorb 12/9', 73, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['turntable-ladder'], designation: 'DLAK 12/9'}),
+    entry('C.2.15', 'Automatikdrehleiter mit Rettungskorb 18/12', 73, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['turntable-ladder'], designation: 'DLAK 18/12'}),
+    entry('C.2.16', 'Automatikdrehleiter mit Rettungskorb 23/12', 74, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['turntable-ladder'], designation: 'DLAK 23/12'}),
+    entry('C.2.17', 'Hubarbeitsbühne (HAB) oder Teleskopgelenkmast (TGM)', 74, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['aerial-platform'], designation: 'HAB'}),
+    entry('C.2.18', 'Rüstwagen', 74, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['technical-rescue']}),
+    entry('C.2.19', 'Wechselladerfahrzeug', 74, {form: 'land-vehicle', ...FIRE, drive: 'road', body: 'swap-loader'}),
+    entry('C.2.20', 'Gerätewagen Gefahrgut', 74, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['cbrn'], designation: 'GW-G'}),
+    entry('C.2.21', 'Gerätewagen Logistik 1', 74, {form: 'land-vehicle', ...FIRE, drive: 'road', supplements: ['logistics'], designation: 'GW-L1'}),
+    entry('C.2.22', 'Gerätewagen Logistik 2', 74, {form: 'land-vehicle', ...FIRE, drive: 'road', supplements: ['logistics'], designation: 'GW-L2'}),
+    entry('C.2.23', 'Mannschaftstransportfahrzeug, 9-sitzig', 75, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['transporting'], designation: 'MTF'}),
+    entry('C.2.24', 'CBRN-Erkundungswagen', 75, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['cbrn-measuring'], designation: 'CBRN ErkW'}),
+    entry('C.2.25', 'Gerätewagen Dekontamination Personal', 75, {form: 'land-vehicle', ...FIRE, drive: 'offroad', abilities: ['decontamination'], designation: 'GW Dekon P'}),
+    entry('C.2.26', 'Schlauchwagen Katastrophenschutz', 75, {form: 'land-vehicle', ...FIRE, drive: 'offroad', abilities: ['water-conveying'], designation: 'SW KatS'}),
+    entry('C.2.27', 'Feuerwehrkran 30', 75, {form: 'land-vehicle', ...FIRE, drive: 'road', abilities: ['crane'], designation: 'FwK 30'}),
+    entry('C.2.28', 'Teleskoplader', 75, {form: 'land-vehicle', ...FIRE, drive: 'offroad', abilities: ['telehandler'], designation: 'Telelader'}),
+    entry('C.2.29', 'Tragkraftspritzenanhänger', 76, {form: 'land-vehicle', ...FIRE, body: 'trailer', drive: 'towed-by-car', abilities: ['firefighting']}),
+    entry('C.2.30', 'Feuerwehr Netzersatzanlage 120 kVA', 76, {form: 'land-vehicle', ...FIRE, body: 'trailer', drive: 'towed-by-car', supplements: ['logistics'], abilities: ['power'], designation: '120'}),
+    entry('C.2.31', 'Geschützte Löschdrohne/Löschroboter auf Kettenfahrgestell', 76, {form: 'land-vehicle', ...FIRE, protected: true, drive: 'tracked', supplements: ['uncrewed'], abilities: ['firefighting']}),
     ownMark('W.1', 'Unterflurhydrant', 'hydrant-underground'),
     ownMark('W.2', 'Überflurhydrant', 'hydrant-pillar'),
     ownMark('W.3', 'Offenes Gewässer', 'open-water'),
