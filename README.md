@@ -114,6 +114,14 @@ as `W.1`–`W.5` with `recommended: false`; `catalogSignTree` draws any entry. N
 catalogue, and `./toolchain.sh sign-references` renders the pages of the recommendations into
 `.references/` to compare.
 
+Dangerous goods after ADR 2025: `dangerLabelTree` draws each danger label pattern of 5.2.2.2.2
+(`DANGER_LABELS`, in ADR order as `DANGER_LABEL_PATTERNS`), `environmentMarkTree` the mark for
+environmentally hazardous substances and `warningPanelTree` the orange-coloured plate, blank or with
+a hazard identification number over a UN number (`HAZARD_NUMBER`, `UN_NUMBER`; other numbers are
+refused). The string variants give the same as SVG markup. Each label names the page of the ADR 2025
+excerpt of chapter 5.2 it is printed on (the free excerpt of the Gefahrgutshop), and the test bench
+shows them below the tactical signs.
+
 ## Polling and browser storage
 
 ```ts

@@ -1,6 +1,6 @@
 {
   "name": "@emberbox/ui",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Shared look and building blocks of the Emberbox tools, built on Nuxt UI.",
   "type": "module",
   "license": "MIT",
