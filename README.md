@@ -93,20 +93,26 @@ time as two strings in German notation) and `CollapsibleSection`, which remember
 open. Besides their own props the fields pass `class`, `hint`, `help`, `error` and
 `required` on to the `UFormField` around them; all of them take `disabled`. The pattern page shows all of them.
 
-## Logo, SEO and prerendering
+## Logo, app, SEO and prerendering
 
 ```ts
 // vite.config.ts
 emberbox({
     url: 'https://calltaker.emberbox.app',
     logo: 'calltaker',
+    app: {name: 'Calltaker', description: 'Notrufannahme üben.'},
     prerender: {entry: 'src/prerender.ts', paths: ['/', '/hilfe']},
 })
 ```
 
-- `logo` puts `favicon.svg`, `apple-touch-icon.png` and `logo-512.png` at the root and links them;
-  `logo-512.png` is also the default preview image. `AppHeader` shows the logo with
-  `logo="/favicon.svg"`.
+- `logo` puts `favicon.svg`, `apple-touch-icon.png`, `logo-192.png`, `logo-512.png`,
+  `logo-maskable-192.png` and `logo-maskable-512.png` at the root and links the first two; the other
+  four are the app icons, and `logo-512.png` is also the default preview image. `AppHeader` shows
+  the logo with `logo="/favicon.svg"`.
+- `app` makes the tool installable as an app: it writes `manifest.webmanifest` (standalone, starting
+  at `/`, the logo as regular and maskable icon in 192 and 512 px) and links it with the theme colour.
+  It needs `logo`. There is no service worker, so the installed app always loads from the server and
+  updates arrive through the new-build banner as in the browser.
 - `usePage({title, description, path, index, image, structuredData})` sets a page's title,
   description, canonical URL, OpenGraph and `robots`; `webApplicationData(...)` provides matching
   JSON-LD.

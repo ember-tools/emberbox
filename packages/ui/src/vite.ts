@@ -4,10 +4,12 @@ import {defu} from 'defu'
 import {execSync} from 'node:child_process'
 import type {PluginOption} from 'vite'
 import {type Logo, logoPlugin} from './vite/logo.js'
+import {type AppOptions, manifestPlugin} from './vite/manifest.js'
 import {prerenderPlugin, type PrerenderOptions} from './vite/prerender.js'
 
 export {PAGES_DIR, type PrerenderOptions} from './vite/prerender.js'
 export type {Logo} from './vite/logo.js'
+export type {AppOptions} from './vite/manifest.js'
 
 /** Settings a tool passes to `emberbox()`. */
 export interface EmberboxOptions {
@@ -21,6 +23,8 @@ export interface EmberboxOptions {
     logo?: Logo
     /** Which public pages are prerendered at build time; needs `url`. */
     prerender?: PrerenderOptions
+    /** Makes the tool installable as an app under this name; needs `logo` for the app icons. */
+    app?: AppOptions
 }
 
 const COLORS = ['primary', 'signal', 'success', 'info', 'warning', 'error']
@@ -111,6 +115,9 @@ export function emberbox(options: EmberboxOptions = {}): PluginOption[] {
     if (options.prerender && !url) {
         throw new Error('emberbox(): prerendering needs a url.')
     }
+    if (options.app && !options.logo) {
+        throw new Error('emberbox(): an installable app needs a logo.')
+    }
     return [
         ui({
             router: options.router ?? true,
@@ -132,7 +139,7 @@ export function emberbox(options: EmberboxOptions = {}): PluginOption[] {
                 },
                 optimizeDeps: {exclude: ['@emberbox/ui', '@iconify/vue']},
                 resolve: {dedupe: ['vue', 'vue-router', '@nuxt/ui']},
-                ssr: {noExternal: ['@emberbox/ui', '@nuxt/ui']},
+                ssr: {noExternal: ['@emberbox/ui', '@nuxt/ui', 'vue-router']},
             }),
             transformIndexHtml: () => [
                 {tag: 'script', children: COLOR_MODE_SCRIPT, injectTo: 'head'},
@@ -144,6 +151,7 @@ export function emberbox(options: EmberboxOptions = {}): PluginOption[] {
             },
         },
         options.logo ? logoPlugin(options.logo) : false,
+        options.app && options.logo ? manifestPlugin(options.app) : false,
         options.prerender && url ? prerenderPlugin(options.prerender, url) : false,
     ]
 }

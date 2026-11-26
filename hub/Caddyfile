@@ -16,6 +16,7 @@
 		-Server
 	}
 	header /build.json Cache-Control "no-store"
+	header /manifest.webmanifest Content-Type "application/manifest+json"
 	header /assets/* Cache-Control "public, max-age=31536000, immutable"
 
 	@internal path /index.html /pages/*

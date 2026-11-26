@@ -8,6 +8,7 @@ export default defineConfig({
         emberbox({
             url: 'https://emberbox.app',
             logo: 'emberbox',
+            app: {name: 'Emberbox', description: 'Werkzeuge für Ausbildung und Übung der Feuerwehr.'},
             prerender: {entry: 'src/prerender.ts', paths: ['/', '/impressum', '/datenschutz']},
         }),
     ],

@@ -8,6 +8,7 @@ export default defineConfig({
         emberbox({
             url: 'https://probe.emberbox.app/',
             logo: 'calltaker',
+            app: {name: 'Probe', shortName: 'Probe', description: 'Prüft die Bibliothek.'},
             prerender: {entry: 'src/prerender.ts', paths: ['/', '/hilfe']},
         }),
     ],

@@ -1,7 +1,9 @@
 /**
  * Generates the logos of the Emberbox tools: a red plaque with a white Lucide pictogram as SVG,
- * plus PNG versions for touch icons. Run it only when a logo is added or changed; the output is
- * checked in under `logos/`. The PNGs are rendered by `resvg` from `shell.nix`.
+ * plus PNG versions for touch and app icons. The maskable variant fills the whole square, since a
+ * device cuts its own shape out of it; the pictogram already sits inside the safe zone. Run it only
+ * when a logo is added or changed; the output is checked in under `logos/`. The PNGs are rendered
+ * by `resvg` from `shell.nix`.
  */
 import {execFileSync} from 'node:child_process'
 import {mkdirSync, readFileSync, writeFileSync} from 'node:fs'
@@ -16,7 +18,8 @@ const TOOLS = {
     planspiel: 'map-pinned',
 }
 const SIGNAL = '#d5271b'
-const PNG_SIZES = [180, 512]
+const PNG_SIZES = [180, 192, 512]
+const MASKABLE_SIZES = [192, 512]
 
 const lucide = JSON.parse(readFileSync(createRequire(import.meta.url).resolve('@iconify-json/lucide/icons.json'), 'utf8'))
 const target = join(import.meta.dirname, '..', 'logos')
@@ -30,6 +33,10 @@ for (const [tool, icon] of Object.entries(TOOLS)) {
     writeFileSync(svgFile, svg)
     for (const size of PNG_SIZES) {
         execFileSync('resvg', ['-w', String(size), '-h', String(size), svgFile, join(target, `${tool}-${size}.png`)])
+    }
+    const maskable = svg.replace(' rx="8"', '')
+    for (const size of MASKABLE_SIZES) {
+        execFileSync('resvg', ['-w', String(size), '-h', String(size), '-', join(target, `${tool}-maskable-${size}.png`)], {input: maskable})
     }
 }
 console.log(`Generated logos for ${Object.keys(TOOLS).join(', ')}.`)

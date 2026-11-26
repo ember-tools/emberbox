@@ -53,7 +53,14 @@ expect(JSON.parse(read('build.json') || '{}').builtAt, 'build.json has no build 
 const css = readdirSync(join(dist, 'assets')).filter(file => file.endsWith('.css')).map(file => readFileSync(join(dist, 'assets', file), 'utf8')).join('')
 expect(css.includes('max-w-3xl'), "the app's own Tailwind classes are missing from the CSS")
 expect(css.includes('--color-signal-500'), 'the Emberbox theme is missing from the CSS')
-for (const file of ['favicon.svg', 'apple-touch-icon.png', 'logo-512.png']) expect(existsSync(join(dist, file)), `${file} is missing`)
+for (const file of ['favicon.svg', 'apple-touch-icon.png', 'logo-192.png', 'logo-512.png', 'logo-maskable-192.png', 'logo-maskable-512.png', 'manifest.webmanifest']) {
+    expect(existsSync(join(dist, file)), `${file} is missing`)
+}
+const manifest = JSON.parse(read('manifest.webmanifest'))
+expect(manifest.name === 'Probe' && manifest.display === 'standalone' && manifest.start_url === '/', 'manifest has the wrong name, display or start')
+expect(manifest.icons.some(icon => icon.purpose === 'maskable' && icon.sizes === '512x512'), 'manifest has no maskable icon')
+expect(shell.includes('rel="manifest"') && shell.includes('name="theme-color"'), 'index.html does not link the manifest and theme colour')
+expect(start.includes('rel="manifest"'), 'prerendered start page does not link the manifest')
 
 if (failures.length) {
     console.error(`Probe failed:\n- ${failures.join('\n- ')}`)
