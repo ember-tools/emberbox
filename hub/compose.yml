@@ -1,29 +1,12 @@
 services:
-  emberbox:
-    image: "ghcr.io/ember-tools/emberbox-hub:latest"
-    container_name: emberbox
+  hub:
+    image: ghcr.io/ember-tools/emberbox-hub:latest
     restart: unless-stopped
-    expose:
-      - "80"
-    labels:
-      traefik.enable: true
-      traefik.http.routers.emberbox.rule: "Host(`emberbox.app`) || Host(`www.emberbox.app`)"
-      traefik.http.routers.emberbox.entrypoints: https
-      traefik.http.routers.emberbox.tls: true
-      traefik.http.routers.emberbox.tls.certresolver: cloudflare
-      traefik.http.routers.emberbox.tls.domains[0].main: "emberbox.app"
-      traefik.http.routers.emberbox.tls.domains[0].sans: "*.emberbox.app"
-      traefik.http.routers.emberbox.middlewares: emberbox-www
-      traefik.http.middlewares.emberbox-www.redirectregex.regex: "^https://www\\.emberbox\\.app/(.*)"
-      traefik.http.middlewares.emberbox-www.redirectregex.replacement: "https://emberbox.app/$${1}"
-      traefik.http.middlewares.emberbox-www.redirectregex.permanent: true
-      traefik.http.services.emberbox.loadbalancer.server.port: 80
-      com.centurylinklabs.watchtower.enable: true
     volumes:
       - ./config:/etc/emberbox:ro
-    networks:
-      - traefik
-
-networks:
-  traefik:
-    external: true
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.emberbox-hub.rule: "Host(`emberbox.app`)"
+      traefik.http.routers.emberbox-hub.entrypoints: websecure
+      traefik.http.routers.emberbox-hub.tls.certresolver: letsencrypt
+      traefik.http.services.emberbox-hub.loadbalancer.server.port: "80"

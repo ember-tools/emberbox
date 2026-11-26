@@ -155,8 +155,9 @@ pages say the details could not be loaded.
 docker run --rm -p 8080:80 emberbox-hub:local   # view at http://localhost:8080
 ```
 
-On `main`, CI builds the image `ghcr.io/ember-tools/emberbox-hub`. `hub/compose.yml` runs it
-behind Traefik at `emberbox.app`.
+On `main`, CI builds the image `ghcr.io/ember-tools/emberbox-hub`. `hub/compose.yml` is a template
+for running it behind Traefik at `emberbox.app`; adapt entrypoint, certificate resolver and network
+to the target server.
 
 ## Publishing
 
