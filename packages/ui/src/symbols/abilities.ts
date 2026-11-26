@@ -6,11 +6,10 @@
  * their artwork.
  */
 
+import type {BoxPart} from './svg'
+
 /** One stroke, filled shape or piece of writing of an ability, on the 100 × 60 box. */
-export type AbilityPart =
-    | {d: string, filled?: boolean, width?: number}
-    | {circle: [number, number, number], filled?: boolean}
-    | {text: string, x: number, y: number, size: number}
+export type AbilityPart = BoxPart
 
 /** An ability of chapter 4 with its number, name after the recommendations and printed page. */
 export interface Ability {
@@ -24,13 +23,16 @@ export interface Ability {
 
 const CBRN: AbilityPart[] = [{circle: [34, 10, 6], filled: true}, {circle: [66, 10, 6], filled: true}, {d: 'M34 10 L68 54 M66 10 L32 54'}]
 /** A wavy line at a height, from one x to another in waves of 10. */
-function waves(y: number, from = 30, to = 70): AbilityPart {
+export function waves(y: number, from = 30, to = 70): AbilityPart {
     const more = Math.max(0, Math.round((to - from) / 10) - 1)
     return {d: `M${from} ${y} q5 -5 10 0${' t10 0'.repeat(more)}`}
 }
-const DIAMOND = (cx: number, cy: number, r: number): AbilityPart => ({d: `M${cx} ${cy - r} L${cx + r} ${cy} L${cx} ${cy + r} L${cx - r} ${cy} Z`})
-const VET: AbilityPart = {d: 'M36 6 H44 L56 54 L68 6 H76'}
-const ARROW_HEAD = (x: number, y: number, dx: number, dy: number): AbilityPart => ({d: `M${x - dx * 6 - dy * 4} ${y - dy * 6 + dx * 4} L${x} ${y} L${x - dx * 6 + dy * 4} ${y - dy * 6 - dx * 4}`})
+/** A diamond around a point. */
+export const DIAMOND = (cx: number, cy: number, r: number): AbilityPart => ({d: `M${cx} ${cy - r} L${cx + r} ${cy} L${cx} ${cy + r} L${cx - r} ${cy} Z`})
+/** The V of veterinary care. */
+export const VET: AbilityPart = {d: 'M36 6 H44 L56 54 L68 6 H76'}
+/** An open arrow head at a point, pointing along (dx, dy). */
+export const ARROW_HEAD = (x: number, y: number, dx: number, dy: number): AbilityPart => ({d: `M${x - dx * 6 - dy * 4} ${y - dy * 6 + dx * 4} L${x} ${y} L${x - dx * 6 + dy * 4} ${y - dy * 6 - dx * 4}`})
 
 /** The abilities of chapter 4, keyed by a short English name. */
 export const ABILITIES = {

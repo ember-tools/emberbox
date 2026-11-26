@@ -103,9 +103,12 @@ Tactical signs after the recommendations of the BBK (2024): `tacticalSignTree` b
 its building blocks (`TacticalSignSpec`: basic form, organisation colour in a filled, outline or
 black and white style, unit size or association, supplementary signs, how a vehicle runs, what it
 carries or how it flies, writing). `abilities` adds the symbols of chapter 4 (`ABILITIES`), stacked
-from the bottom up, and `designation` the short name in the upper left corner.
-`TACTICAL_SIGN_CATALOG` lists the signs of chapters 1–4, 5.1, 5.4, 5.5 and the fire service
-examples of annex C with number, name and printed page, plus the library's own water supply marks
+from the bottom up; `designation`, `fieldB` and `fieldX` fill the corners, `level`, `strength`, `time`,
+`identification` and `certainty` write around the sign and widen its canvas as needed, and
+`figure` and `located` draw the places and command posts of annex D. `additionalSignTree` draws
+the signs of 5.2, 5.7 and 5.8 that stand on their own (`ADDITIONAL_SIGNS`).
+`TACTICAL_SIGN_CATALOG` lists the signs of chapters 1–6 and the fire service and command examples
+of annexes C and D with number, name and printed page, plus the library's own water supply marks
 as `W.1`–`W.5` with `recommended: false`; `catalogSignTree` draws any entry. Name
 `CATALOG_SOURCE` wherever they are shown. The hub's test bench at `/pattern/signs` draws the
 catalogue, and `./toolchain.sh sign-references` renders the pages of the recommendations into

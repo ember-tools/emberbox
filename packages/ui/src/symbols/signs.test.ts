@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest'
 import {ABILITIES} from './abilities'
+import {ADDITIONAL_SIGNS, additionalSignTree} from './additional'
 import {TACTICAL_SIGN_CATALOG, catalogSignTree} from './catalog'
 import {
     BASIC_FORMS, DRIVES, FLIGHTS, ORGANISATION_COLOURS, SIGN_ORGANISATIONS, SIGN_SIZES, SUPPLEMENTS, VEHICLE_BODIES,
@@ -135,12 +136,12 @@ describe('catalogue', () => {
         const ids = TACTICAL_SIGN_CATALOG.map(entry => entry.id)
         expect(new Set(ids).size).toBe(ids.length)
         for (const entry of TACTICAL_SIGN_CATALOG) {
-            expect(entry.number, entry.id).toMatch(entry.recommended ? /^([1-5]|C)(\.\d+)+$/ : /^W\.\d+$/)
+            expect(entry.number, entry.id).toMatch(entry.recommended ? /^([1-6]|C|D)(\.\d+)+$/ : /^W\.\d+$/)
             expect(entry.page !== undefined, entry.id).toBe(entry.recommended)
         }
     })
 
-    it('covers chapters 1 to 4, 5.1, 5.4, 5.5 and annex C of the recommendations', () => {
+    it('covers chapters 1 to 6 and annexes C and D of the recommendations', () => {
         const numbers = new Set(TACTICAL_SIGN_CATALOG.map(entry => entry.number))
         const expected = [
             ...Array.from({length: 14}, (_, n) => `1.${n + 1}`),
@@ -155,6 +156,12 @@ describe('catalogue', () => {
             ...Object.values(ABILITIES).map(ability => ability.number),
             ...Array.from({length: 15}, (_, n) => `C.1.${n + 1}`),
             ...Array.from({length: 31}, (_, n) => `C.2.${n + 1}`),
+            ...Object.values(ADDITIONAL_SIGNS).map(sign => sign.number),
+            '5.3', '5.6', '6.1', '6.2',
+            ...Array.from({length: 9}, (_, n) => `D.1.${n + 1}`),
+            ...Array.from({length: 7}, (_, n) => `D.2.${n + 1}`),
+            ...Array.from({length: 15}, (_, n) => `D.3.${n + 1}`),
+            ...Array.from({length: 5}, (_, n) => `D.4.${n + 1}`),
         ]
         for (const number of expected) expect(numbers.has(number), number).toBe(true)
     })
@@ -238,5 +245,138 @@ describe('abilities', () => {
             expect(ability.page, name).toBeLessThanOrEqual(31)
             expect(ability.parts.length, name).toBeGreaterThan(0)
         }
+    })
+})
+
+describe('additional signs', () => {
+    /** Every element of an additional sign, flattened. */
+    function drawn(name: keyof typeof ADDITIONAL_SIGNS): SvgElement[] {
+        const all: SvgElement[] = []
+        const walk = (node: SvgElement) => {
+            all.push(node)
+            node.children?.forEach(walk)
+        }
+        walk(additionalSignTree(name))
+        return all
+    }
+
+    it('has every sign of 5.2, 5.7 and 5.8 with its number, name and page', () => {
+        const perSection = Object.values(ADDITIONAL_SIGNS).reduce<Record<string, number>>((counts, sign) => {
+            const section = sign.number.split('.').slice(0, sign.number.startsWith('5.8') ? 3 : 2).join('.')
+            return {...counts, [section]: (counts[section] ?? 0) + 1}
+        }, {})
+        expect(perSection).toEqual({
+            '5.2': 6, '5.7': 6, '5.8.1': 14, '5.8.2': 4, '5.8.3': 3, '5.8.4': 3, '5.8.5': 3, '5.8.6': 3, '5.8.7': 10, '5.8.8': 17, '5.8.9': 4,
+        })
+        for (const [name, sign] of Object.entries(ADDITIONAL_SIGNS)) {
+            expect(sign.page, name).toBeGreaterThanOrEqual(35)
+            expect(sign.page, name).toBeLessThanOrEqual(49)
+        }
+    })
+
+    it('draws hazards and damage red, water blue and people black, as 5.8 recommends', () => {
+        const strokes = (name: keyof typeof ADDITIONAL_SIGNS) => new Set(drawn(name).map(part => part.attributes.stroke).filter(Boolean))
+        expect(strokes('explosion')).toEqual(new Set(['#FA321E']))
+        expect(strokes('destroyed')).toEqual(new Set(['#FA321E']))
+        expect(strokes('water-ingress')).toEqual(new Set(['#3264FA']))
+        expect(strokes('injured')).toEqual(new Set(['#000000']))
+        expect(strokes('attack')).toEqual(new Set(['#3264FA', '#FA321E']))
+    })
+
+    it('reddens one more quarter with each grade of activity and failure', () => {
+        const red = (name: 'activity-1' | 'activity-2' | 'activity-3' | 'activity-4') =>
+            drawn(name).filter(part => part.tag === 'path' && part.attributes.fill === '#FA321E').length
+        expect([red('activity-1'), red('activity-2'), red('activity-3'), red('activity-4')]).toEqual([1, 2, 3, 4])
+    })
+})
+
+describe('writing around a sign', () => {
+    /** The view box of a sign as numbers. */
+    function viewBox(spec: TacticalSignSpec): number[] {
+        return String(tacticalSignTree(spec).attributes.viewBox).split(' ').map(Number)
+    }
+
+    it('keeps the common canvas without writing around the sign', () => {
+        expect(viewBox({form: 'formation', organisation: 'fire'})).toEqual([0, 0, 120, 80])
+    })
+
+    it('widens the canvas to the left for a time and to the right for an identification, keeping the sign in place', () => {
+        const [x, , width] = viewBox({form: 'formation', organisation: 'fire', time: '040835jun23'})
+        expect(x).toBeLessThan(0)
+        expect(width).toBe(120 - x!)
+        const time = parts({form: 'formation', organisation: 'fire', time: '040835jun23'}).find(part => part.text === '040835jun23')!
+        expect(time.attributes['text-anchor']).toBe('end')
+        expect(Number(time.attributes.x)).toBeLessThan(10)
+        const [left, , wide] = viewBox({form: 'formation', organisation: 'fire', identification: '2-1-3'})
+        expect(left).toBe(0)
+        expect(wide).toBeGreaterThan(120)
+        expect(outline({form: 'formation', organisation: 'fire', time: '1', identification: '2'}).attributes.d).toBe(outline({form: 'formation'}).attributes.d)
+    })
+
+    it('writes a strength below the form and underlines its total', () => {
+        const strength = parts({form: 'formation', organisation: 'fire', strength: '1/1/6/40/48'}).find(part => part.tag === 'text' && part.children)!
+        expect(strength.children!.map(span => span.text)).toEqual(['1/1/6/40/', '48'])
+        expect(strength.children![1]!.attributes['text-decoration']).toBe('underline')
+        const [, , , height] = viewBox({form: 'land-vehicle', organisation: 'fire', drive: 'road', strength: '0/1/8/9'})
+        expect(height).toBeGreaterThan(80)
+    })
+
+    it('puts a red question or exclamation mark before the sign, black in black and white', () => {
+        const mark = parts({form: 'person', certainty: 'presumed'}).find(part => part.text === '?')!
+        expect(mark.attributes.fill).toBe('#FA321E')
+        expect(parts({form: 'person', style: 'mono', certainty: 'acute'}).find(part => part.text === '!')!.attributes.fill).toBe('#000000')
+        expect(Number(mark.attributes.x)).toBeLessThan(34)
+        expect(parts({form: 'person', certainty: 'acute'}).some(part => part.text === '!')).toBe(true)
+    })
+
+    it('sets the stars of an administrative level above the form, higher above a size mark', () => {
+        const stars = (spec: TacticalSignSpec) => parts(spec).filter(part => part.tag === 'path' && part.attributes['stroke-width'] === 1.5)
+            .map(part => String(part.attributes.d).split('V').length - 1)
+        expect(stars({form: 'person', organisation: 'command', level: 2})).toEqual([2])
+        expect(stars({form: 'person', organisation: 'command', level: 6})).toEqual([6])
+        expect(viewBox({form: 'person', organisation: 'command', level: 2})[1]).toBe(0)
+        expect(viewBox({form: 'formation', organisation: 'fire', size: 'group', level: 2})[1]).toBeLessThan(0)
+    })
+
+    it('writes field B inside the lower right corner, or beside a form too small to hold it', () => {
+        const inside = parts({form: 'formation', organisation: 'aid', fieldB: 'DLRG'}).find(part => part.text === 'DLRG')!
+        expect(inside.attributes['text-anchor']).toBe('end')
+        expect(Number(inside.attributes.x)).toBeLessThan(110)
+        const beside = parts({form: 'person', organisation: 'aid', fieldB: 'ASB'}).find(part => part.text === 'ASB')!
+        expect(beside.attributes['text-anchor']).toBe('start')
+        expect(beside.attributes.fill).toBe('#000000')
+    })
+
+    it('writes the fields X in the upper right and lower left corners', () => {
+        const fields = parts({form: 'formation', organisation: 'aid', supplements: ['command'], fieldX: {upperRight: 'TP', lowerLeft: 'K'}})
+        const upper = fields.find(part => part.text === 'TP')!
+        const lower = fields.find(part => part.text === 'K')!
+        expect([upper.attributes['text-anchor'], Number(upper.attributes.x) > 90, Number(upper.attributes.y) > 30]).toEqual(['end', true, true])
+        expect([lower.attributes['text-anchor'], Number(lower.attributes.x) < 30, Number(lower.attributes.y) > 50]).toEqual(['start', true, true])
+    })
+
+    it('starts an identification after a short name written beside the form', () => {
+        const writing = parts({form: 'person', organisation: 'thw', abbreviation: true, identification: '2-1-3'})
+        expect(Number(writing.find(part => part.text === '2-1-3')!.attributes.x)).toBeGreaterThan(110)
+    })
+
+    it('caps a person in command with a filled tip instead of a bar', () => {
+        const cap = parts({form: 'person', organisation: 'command', supplements: ['command']}).find(part => part.attributes.d === 'M60 16 L71 27 H49 Z')!
+        expect(cap.attributes.fill).toBe('#000000')
+    })
+
+    it('sets writing inside a person small enough to fit and keeps abilities inside the diamond', () => {
+        const text = parts({form: 'person', organisation: 'command', text: 'EL'}).find(part => part.text === 'EL')!
+        expect(text.attributes['font-size']).toBe(13)
+        const ability = parts({form: 'person', organisation: 'fire', abilities: ['firefighting']})
+            .find(part => part.tag === 'g' && String(part.attributes.transform ?? '').startsWith('translate'))!
+        expect(String(ability.attributes.transform)).toMatch(/^translate\(46 /)
+    })
+
+    it('draws a figure of annex D.2 inside a place and the line to a command post\'s location', () => {
+        expect(parts({form: 'place', organisation: 'command', figure: 'landing-zone'}).some(part => part.attributes.fill === '#000000' && part.tag === 'path')).toBe(true)
+        const located = parts({form: 'formation', organisation: 'command', supplements: ['command'], located: true})
+        expect(located.some(part => part.attributes['stroke-dasharray'] === '4 3')).toBe(true)
+        expect(viewBox({form: 'formation', organisation: 'command', located: true})[3]).toBeGreaterThan(80)
     })
 })
