@@ -41,7 +41,8 @@ Usage: ./toolchain.sh <command> [args...]
   lint-test       Tests of @emberbox/lint
   lint            emberbox-lint in the lint package, the library and the hub
   lint-probe      Pack @emberbox/lint, install it into the project in probe-lint/, run every linter
-                  and check that a stray comment fails; EMBERBOX_PROBE_KEEP=1 keeps the directory
+                  and check that a stray comment and a retired storage key fail;
+                  EMBERBOX_PROBE_KEEP=1 keeps the directory
   verify          ui-build, ui-typecheck, ui-icons, lint-test, lint and hub-build
 TEXT
 }
@@ -71,6 +72,14 @@ case "$command" in
         output="$(run npx emberbox-lint comments 2>&1)" || status=$?
         if [ "$status" -ne 1 ] || ! grep -q "src/stray.ts" <<<"$output"; then
             echo "lint-probe: the comment check did not reject the stray comment (exit $status)" >&2
+            exit 1
+        fi
+        rm src/stray.ts
+        printf "export const old = localStorage.getItem('probe.old_ABC')\n" > src/reads-retired.ts
+        status=0
+        output="$(run npx emberbox-lint browser-storage 2>&1)" || status=$?
+        if [ "$status" -ne 1 ] || ! grep -q "is retired" <<<"$output"; then
+            echo "lint-probe: the storage check did not reject a retired key (exit $status)" >&2
             exit 1
         fi
         ;;
