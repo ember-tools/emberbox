@@ -126,6 +126,14 @@ const {details, state} = useLegalDetails()
         Kartenkacheln holt der Server selbst von OpenStreetMap und liefert sie aus; der Browser stellt dafür keine
         Verbindung zu OpenStreetMap her. Der Server löscht eine Kachel, die 30 Tage lang niemand aufgerufen hat.
       </p>
+      <p class="m-0">
+        Für die Adresssuche gibt der Server den Suchtext an Photon weiter, einen Dienst der komoot GmbH,
+        Kienberger Allee 4, 12529 Schönefeld, der Orte aus OpenStreetMap findet. Photon erhält nur den Suchtext
+        und die Adresse unseres Servers, nicht die IP-Adresse der Nutzenden. Der Server speichert die Suchtexte
+        nicht dauerhaft und protokolliert sie nicht; gleiche Suchen hält er höchstens zehn Minuten im
+        Arbeitsspeicher vor, um Photon nicht doppelt zu fragen. Rechtsgrundlage ist unser berechtigtes Interesse,
+        die gewünschte Suche bereitzustellen (Art. 6 Abs. 1 lit. f DSGVO).
+      </p>
     </section>
 
     <section class="flex flex-col gap-2">
