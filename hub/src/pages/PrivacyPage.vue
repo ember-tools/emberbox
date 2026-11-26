@@ -20,8 +20,8 @@ const {details, state} = useLegalDetails()
       <h2 class="headline text-2xl">Überblick</h2>
       <p class="m-0">
         Diese Erklärung gilt für emberbox.app und die Werkzeuge Alarmzettel (alarmzettel.emberbox.app),
-        Status Sim (statussim.emberbox.app), Calltaker (calltaker.emberbox.app) und Planspielplatte
-        (planspiel.emberbox.app). Keines davon verlangt eine
+        Status Sim (statussim.emberbox.app), Calltaker (calltaker.emberbox.app), Planspielplatte
+        (planspiel.emberbox.app) und Förderstrecke (foerderstrecke.emberbox.app). Keines davon verlangt eine
         Anmeldung, zeigt Werbung oder setzt Analyse- oder Tracking-Dienste ein. Schriften, Symbole und
         Kartenkacheln kommen von unseren Servern; beim Aufruf wird nichts von einem fremden Dienst geladen.
       </p>
@@ -133,6 +133,33 @@ const {details, state} = useLegalDetails()
         nicht dauerhaft und protokolliert sie nicht; gleiche Suchen hält er höchstens zehn Minuten im
         Arbeitsspeicher vor, um Photon nicht doppelt zu fragen. Rechtsgrundlage ist unser berechtigtes Interesse,
         die gewünschte Suche bereitzustellen (Art. 6 Abs. 1 lit. f DSGVO).
+      </p>
+    </section>
+
+    <section class="flex flex-col gap-2">
+      <h2 class="headline text-2xl">Förderstrecke</h2>
+      <p class="m-0">
+        Eine Strecke entsteht im lokalen Speicher des Browsers: der Verlauf der Leitung, Höhen, Pumpen, Einstellungen
+        und ein Titel, den die Nutzenden selbst wählen; Namen von Personen gehören nicht hinein. Ebenso merkt sich der
+        Browser die aktuelle Rechenaufgabe, welche Aufgaben gelöst wurden, und die selbst erstellten Links mit dem
+        Schlüssel zum Löschen.
+      </p>
+      <p class="m-0">
+        Für die Höhen schickt der Browser den Verlauf der Leitung an unseren Server. Der Server liest die Höhen aus
+        einer eigenen Kopie des Höhenmodells Copernicus DEM; kein anderer Dienst erhält die Koordinaten. Der Server
+        speichert sie nicht und protokolliert sie nicht.
+      </p>
+      <p class="m-0">
+        Wer eine Strecke oder Aufgabe teilt, legt eine Kopie davon auf dem Server ab. Zugang hat, wer den Link kennt;
+        er öffnet eine eigene Kopie. Eine geteilte Strecke bleibt gespeichert, bis sie im Browser, der den Link
+        erstellt hat, gelöscht wird; wer das nicht mehr kann, kann die Löschung über die oben genannte Adresse
+        verlangen. Weil die Links den Zugang enthalten, werden die Aufrufe der Förderstrecke nicht in die
+        Zugriffsprotokolle geschrieben. Rechtsgrundlage ist unser berechtigtes Interesse, die gewünschte Berechnung
+        und das Teilen bereitzustellen (Art. 6 Abs. 1 lit. f DSGVO).
+      </p>
+      <p class="m-0">
+        Kartenkacheln holt der Server selbst von OpenStreetMap und liefert sie aus; der Browser stellt dafür keine
+        Verbindung zu OpenStreetMap her. Der Server löscht eine Kachel, die 30 Tage lang niemand aufgerufen hat.
       </p>
     </section>
 

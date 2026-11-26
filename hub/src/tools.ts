@@ -1,5 +1,6 @@
 import alarmzettel from '@emberbox/ui/logos/alarmzettel.svg'
 import calltaker from '@emberbox/ui/logos/calltaker.svg'
+import foerderstrecke from '@emberbox/ui/logos/foerderstrecke.svg'
 import planspiel from '@emberbox/ui/logos/planspiel.svg'
 import statussim from '@emberbox/ui/logos/statussim.svg'
 
@@ -78,5 +79,16 @@ export const TOOLS: Tool[] = [
         source: 'https://github.com/ember-tools/planspiel',
         license: 'AGPL-3.0',
         help: 'https://planspiel.emberbox.app/hilfe',
+    },
+    {
+        name: 'Förderstrecke',
+        url: 'https://foerderstrecke.emberbox.app',
+        description: 'Wasserförderung über lange Wegstrecken planen und üben: Pumpenabstände, Höhen und Schlauchbedarf auf der Karte, dazu Rechenaufgaben mit Lösungsweg.',
+        logo: foerderstrecke,
+        audiences: ['Jugendfeuerwehr', 'Einsatzabteilung'],
+        category: 'EducationalApplication',
+        source: 'https://github.com/ember-tools/foerderstrecke',
+        license: 'AGPL-3.0',
+        help: 'https://foerderstrecke.emberbox.app/hilfe',
     },
 ]
