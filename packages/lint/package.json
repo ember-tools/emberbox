@@ -1,0 +1,47 @@
+{
+  "name": "@emberbox/lint",
+  "version": "0.1.0",
+  "description": "Shared linters of the Emberbox tools: an ESLint config with the Emberbox rules and the emberbox-lint runner.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ember-tools/emberbox.git",
+    "directory": "packages/lint"
+  },
+  "files": [
+    "src"
+  ],
+  "exports": {
+    ".": "./src/eslint.mjs",
+    "./plugin": "./src/plugin.mjs"
+  },
+  "bin": {
+    "emberbox-lint": "./src/cli/main.mjs"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@eslint/js": "^10.0.1",
+    "@intlify/eslint-plugin-vue-i18n": "^4.5.1",
+    "@intlify/message-compiler": "^11.4.23",
+    "@typescript-eslint/parser": "^8.73.0",
+    "eslint-plugin-import-x": "^4.18.1",
+    "eslint-plugin-vue": "^10.12.1",
+    "eslint-plugin-vuejs-accessibility": "^2.6.3",
+    "globals": "^17.14.0",
+    "jiti": "^2.7.0",
+    "jscpd": "^5.4.3",
+    "jsonc-eslint-parser": "^3.3.0",
+    "typescript-eslint": "^8.73.0",
+    "vue-eslint-parser": "^10.4.2"
+  },
+  "peerDependencies": {
+    "eslint": "^10.15.0"
+  },
+  "devDependencies": {
+    "eslint": "^10.15.0",
+    "vitest": "^5.1.1"
+  }
+}
