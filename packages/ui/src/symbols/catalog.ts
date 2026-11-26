@@ -10,9 +10,10 @@ import {markSymbolTree, type MarkKind} from './tactical'
  * on, and how the library draws it. Numbers repeat in a few places of the recommendations (5.1.1
  * and 5.1.2 name both a vehicle and a section), so `id` is what tells entries apart.
  *
- * A few signs the library draws are not part of the recommendations, such as the marks of the
- * water supply; they carry `recommended: false`, no page and a number of their own, and should not
- * be asked about as if they were.
+ * A few signs the library draws are not part of the recommendations: the functions and squads of a
+ * fire service group, put together from its building blocks, and the marks of the water supply. They
+ * carry `recommended: false`, no page and a number of their own, and should not be asked about as
+ * if they were examples of the recommendations.
  */
 export interface CatalogEntry {
     id: string
@@ -39,6 +40,10 @@ function additionalEntries(section: string): CatalogEntry[] {
             drawing: {additional: name as AdditionalSignName}}))
 }
 
+function ownSign(number: string, name: string, sign: TacticalSignSpec): CatalogEntry {
+    return {id: number, number, name, recommended: false, drawing: {sign}}
+}
+
 function ownMark(number: string, name: string, mark: MarkKind): CatalogEntry {
     return {id: number, number, name, recommended: false, drawing: {mark}}
 }
@@ -56,10 +61,12 @@ const LEADER = {form: 'person', supplements: ['command']} as const
 
 /**
  * The signs of chapters 1 to 6 and annexes C and D of the recommendations, in their order, then the
- * library's own water supply marks. Where a chapter explains a way of writing rather than a sign
- * (5.3, 5.6, 5.8.1.13 before a sign, 6.1, 6.2), its example stands for it. Chapter 1 is drawn black
- * on white as printed, chapter 4 on a plain formation; colours are shown on a tactical formation,
- * supplements, vehicles and sizes in fire service red. Letters that annex C writes inside a symbol
+ * library's own signs: the group of a fire service (leaders with the command bar and their unit size,
+ * the squad leader with the squad size but no command bar, crew members as a person with their short
+ * function, squads as a formation of squad size) and the water supply marks. Where a chapter explains
+ * a way of writing rather than a sign (5.3, 5.6, 5.8.1.13 before a sign, 6.1, 6.2), its example
+ * stands for it. Chapter 1 is drawn black on white as printed, chapter 4 on a plain formation;
+ * colours are shown on a tactical formation, supplements, vehicles and sizes in fire service red. Letters that annex C writes inside a symbol
  * ("P", "G", "ATF") stand in field A here, and the flying line of C.1.13 sits under the form as in
  * 5.1.4.
  */
@@ -227,6 +234,16 @@ export const TACTICAL_SIGN_CATALOG: readonly CatalogEntry[] = [
         {...LEADER, organisation: 'command', level: 2, text: 'LtrGA', fieldB: 'MG'}),
     entry('D.4.4', 'Leiter der Gefahrenabwehrkräfte der Bundespolizei', 80, {...LEADER, organisation: 'police', level: 5, fieldB: 'BuPol'}),
     entry('D.4.5', 'Leiter (Koordinator) einer internationalen Hilfsaktion', 80, {...LEADER, organisation: 'command', level: 6}),
+    ownSign('G.1', 'Gruppenführer', {...LEADER, ...FIRE, size: 'group', text: 'GF'}),
+    ownSign('G.2', 'Staffelführer', {...LEADER, ...FIRE, size: 'section', text: 'StF'}),
+    ownSign('G.3', 'Zugführer', {...LEADER, ...FIRE, size: 'platoon', text: 'ZF'}),
+    ownSign('G.4', 'Truppführer', {form: 'person', ...FIRE, size: 'squad', text: 'TrF'}),
+    ownSign('G.5', 'Maschinist', {form: 'person', ...FIRE, text: 'Ma'}),
+    ownSign('G.6', 'Melder', {form: 'person', ...FIRE, text: 'Me'}),
+    ownSign('G.7', 'Angriffstrupp', {form: 'formation', ...FIRE, size: 'squad', text: 'A-Tr'}),
+    ownSign('G.8', 'Wassertrupp', {form: 'formation', ...FIRE, size: 'squad', text: 'W-Tr'}),
+    ownSign('G.9', 'Schlauchtrupp', {form: 'formation', ...FIRE, size: 'squad', text: 'S-Tr'}),
+    ownSign('G.10', 'Sicherheitstrupp', {form: 'formation', ...FIRE, size: 'squad', text: 'Si-Tr'}),
     ownMark('W.1', 'Unterflurhydrant', 'hydrant-underground'),
     ownMark('W.2', 'Überflurhydrant', 'hydrant-pillar'),
     ownMark('W.3', 'Offenes Gewässer', 'open-water'),

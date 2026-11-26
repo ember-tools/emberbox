@@ -108,8 +108,9 @@ from the bottom up; `designation`, `fieldB` and `fieldX` fill the corners, `leve
 `figure` and `located` draw the places and command posts of annex D. `additionalSignTree` draws
 the signs of 5.2, 5.7 and 5.8 that stand on their own (`ADDITIONAL_SIGNS`).
 `TACTICAL_SIGN_CATALOG` lists the signs of chapters 1–6 and the fire service and command examples
-of annexes C and D with number, name and printed page, plus the library's own water supply marks
-as `W.1`–`W.5` with `recommended: false`; `catalogSignTree` draws any entry. Name
+of annexes C and D with number, name and printed page, plus the library's own signs with
+`recommended: false`: the leaders, crew and squads of a fire service group as `G.1`–`G.10`, built from
+the building blocks, and the water supply marks as `W.1`–`W.5`; `catalogSignTree` draws any entry. Name
 `CATALOG_SOURCE` wherever they are shown. The hub's test bench at `/pattern/signs` draws the
 catalogue, and `./toolchain.sh sign-references` renders the pages of the recommendations into
 `.references/` to compare.
