@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import {usePage} from '@emberbox/ui'
-import {OPERATION, PROVIDER, STATUSSIM_RETENTION} from '../legal'
+import ProviderDetails from '../components/ProviderDetails.vue'
+import {HOSTER, STATUSSIM_RETENTION, useLegalDetails} from '../legal'
 
 usePage({
   title: 'Datenschutz – Emberbox',
   description: 'Welche Daten emberbox.app und die Emberbox-Werkzeuge verarbeiten, wozu und wie lange.',
   path: '/datenschutz',
 })
+
+const {details, state} = useLegalDetails()
 </script>
 
 <template>
@@ -26,19 +29,24 @@ usePage({
 
     <section class="flex flex-col gap-2">
       <h2 class="headline text-2xl">Verantwortlich</h2>
-      <p class="m-0">{{ PROVIDER.name }}</p>
-      <p v-for="line in PROVIDER.address" :key="line" class="m-0">{{ line }}</p>
-      <p class="m-0">E-Mail: {{ PROVIDER.email }}</p>
+      <ProviderDetails :details="details" :state="state"/>
     </section>
 
     <section class="flex flex-col gap-2">
       <h2 class="headline text-2xl">Betrieb und Zugriffsprotokolle</h2>
       <p class="m-0">
-        Alle Seiten laufen auf Servern bei {{ OPERATION.hoster }}. Bei jedem Aufruf verarbeitet der Server
-        technisch notwendig die IP-Adresse, den Zeitpunkt, die aufgerufene Adresse, den Statuscode und die Angabe
-        des Browsers. Daraus entstehen Zugriffsprotokolle, die wir zum sicheren Betrieb und zur Fehlersuche nutzen
-        und nach {{ OPERATION.logRetentionDays }} Tagen löschen. Rechtsgrundlage ist unser berechtigtes Interesse an
-        einem sicheren und funktionierenden Angebot (Art. 6 Abs. 1 lit. f DSGVO).
+        Alle Seiten laufen auf Servern {{ HOSTER }}. Bei jedem Aufruf verarbeitet der Server technisch notwendig
+        die IP-Adresse, den Zeitpunkt, die aufgerufene Adresse, den Statuscode und die Angabe des Browsers. Daraus
+        entstehen Zugriffsprotokolle, die wir zum sicheren Betrieb und zur Fehlersuche nutzen und nach
+        {{ details?.logRetentionDays ?? 'wenigen' }} Tagen löschen. Rechtsgrundlage ist unser berechtigtes
+        Interesse an einem sicheren und funktionierenden Angebot (Art. 6 Abs. 1 lit. f DSGVO). Mit Hetzner
+        besteht ein Vertrag zur Auftragsverarbeitung.
+      </p>
+      <p class="m-0">
+        Vor den Servern steht das Netzwerk von Cloudflare (Cloudflare, Inc., USA). Jeder Aufruf läuft darüber,
+        sodass Cloudflare dieselben Verbindungsdaten verarbeitet, um die Seiten auszuliefern und vor Angriffen
+        zu schützen. Rechtsgrundlage ist ebenfalls Art. 6 Abs. 1 lit. f DSGVO. Cloudflare ist unter dem
+        EU-US Data Privacy Framework zertifiziert; mit Cloudflare besteht ein Vertrag zur Auftragsverarbeitung.
       </p>
     </section>
 

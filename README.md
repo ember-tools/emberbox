@@ -144,8 +144,11 @@ cd ../tool/frontend && npm install ../../emberbox/emberbox-ui-<version>.tgz
 
 The hub in `hub/` is fully prerendered and runs as a static site in a Caddy container behind
 Traefik. The tools are listed in `hub/src/tools.ts`; a new tool is one more entry there. The
-imprint and privacy policy cover all tools; the provider details live in
-`hub/src/legal.ts`.
+imprint and privacy policy cover all tools. The provider's name, address and e-mail and the access
+log retention stay out of the repository: the pages load them from `/legal.json`, which the
+deployment places in `config/legal.json` next to `compose.yml`, mounted at `/etc/emberbox` (see
+`hub/legal.example.json`). Without it the
+pages say the details could not be loaded.
 
 ```sh
 ./toolchain.sh hub-image                       # build the image locally

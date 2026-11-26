@@ -19,6 +19,8 @@ services:
       traefik.http.middlewares.emberbox-www.redirectregex.permanent: true
       traefik.http.services.emberbox.loadbalancer.server.port: 80
       com.centurylinklabs.watchtower.enable: true
+    volumes:
+      - ./config:/etc/emberbox:ro
     networks:
       - traefik
 
