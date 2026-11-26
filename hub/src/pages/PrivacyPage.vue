@@ -170,7 +170,9 @@ const {details, state} = useLegalDetails()
         Der Lernstand bleibt im lokalen Speicher des Browsers: für jede beantwortete Karte das Fach, wann sie wieder
         fällig ist, wie oft sie kam und ob die letzte Antwort stimmte, dazu die gewählte Zahl der Quizfragen. Er
         bleibt dort, bis die Nutzenden ihn zurücksetzen oder die Daten des Browsers löschen. Als Datei verlässt er
-        den Browser nur, wenn die Nutzenden ihn selbst speichern.
+        den Browser nur, wenn die Nutzenden ihn selbst speichern. Ebenso merkt sich der Browser die Auswahl der
+        taktischen Zeichen nach Fachdienst und Ausbildungsstand, bis die Nutzenden eine andere wählen oder die Daten
+        des Browsers löschen.
       </p>
       <p class="m-0">
         Der Server liefert nur die Seiten aus und speichert nichts; die Aufrufe der Lernkarten werden nicht in die
