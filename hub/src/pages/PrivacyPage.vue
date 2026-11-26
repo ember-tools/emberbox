@@ -150,9 +150,9 @@ const {details, state} = useLegalDetails()
         speichert sie nicht und protokolliert sie nicht.
       </p>
       <p class="m-0">
-        Wer eine Strecke oder Aufgabe teilt, legt eine Kopie davon auf dem Server ab. Zugang hat, wer den Link kennt;
-        er öffnet eine eigene Kopie. Eine geteilte Strecke bleibt gespeichert, bis sie im Browser, der den Link
-        erstellt hat, gelöscht wird; wer das nicht mehr kann, kann die Löschung über die oben genannte Adresse
+        Wer eine Strecke oder Aufgabe teilt, legt eine Kopie davon mit dem Zeitpunkt der Erstellung auf dem Server
+        ab. Zugang hat, wer den Link kennt; er öffnet eine eigene Kopie. Eine geteilte Strecke oder Aufgabe bleibt
+        gespeichert, bis sie im Browser, der den Link erstellt hat, gelöscht wird; wer das nicht mehr kann, kann die Löschung über die oben genannte Adresse
         verlangen. Weil die Links den Zugang enthalten, werden die Aufrufe der Förderstrecke nicht in die
         Zugriffsprotokolle geschrieben. Rechtsgrundlage ist unser berechtigtes Interesse, die gewünschte Berechnung
         und das Teilen bereitzustellen (Art. 6 Abs. 1 lit. f DSGVO).
