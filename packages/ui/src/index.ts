@@ -43,6 +43,10 @@ export {CATALOG_SOURCE, TACTICAL_SIGN_CATALOG, catalogSignTree, type CatalogEntr
 export {ABILITIES, type Ability, type AbilityName, type AbilityPart} from './symbols/abilities'
 export {ADDITIONAL_SIGNS, additionalSign, additionalSignTree, type AdditionalSign, type AdditionalSignName} from './symbols/additional'
 export type {BoxPart} from './symbols/svg'
+export {
+    DANGER_LABELS, DANGER_LABEL_PATTERNS, HAZARD_NUMBER, UN_NUMBER, dangerLabel, dangerLabelTree, environmentMark, environmentMarkTree,
+    warningPanel, warningPanelTree, type DangerLabel, type DangerLabelPattern, type WarningPanel,
+} from './symbols/hazmat'
 
 /**
  * Vue plugin that installs Nuxt UI in the Emberbox style. Icons come only from the bundled set; a
