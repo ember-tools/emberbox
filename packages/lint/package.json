@@ -1,6 +1,6 @@
 {
   "name": "@emberbox/lint",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Shared linters of the Emberbox tools: an ESLint config with the Emberbox rules and the emberbox-lint runner.",
   "type": "module",
   "license": "MIT",

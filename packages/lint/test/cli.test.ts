@@ -60,4 +60,58 @@ describe('the script linters', () => {
         const ownKeyWithSource = JSON.stringify({entries: [{key: 'tool.theme', purpose: 'p', kind: 'LOCAL_STORAGE', source: '@emberbox/ui'}]})
         expect(checkBrowserStorage(repository({'src/a.ts': code, 'browser-storage.json': ownKeyWithSource}), options)).toBe(false)
     })
+
+    it('accept retired keys only while the code no longer uses them', () => {
+        const options = {catalogue: 'browser-storage.json', sources: 'src'}
+        const catalogue = (...entries: object[]) => JSON.stringify({entries: [{key: 'tool.view', purpose: 'p', kind: 'LOCAL_STORAGE'}, ...entries]})
+        const retiredKey = {key: 'old_view', purpose: 'p', kind: 'LOCAL_STORAGE', retired: true}
+        const retiredPrefix = {key: 'old_name_*', purpose: 'p', kind: 'LOCAL_STORAGE', retired: true}
+        const current = "localStorage.getItem('tool.view')\n"
+        const cleanUp = "cleanUpStorage({remove: ['old_name_*'], move: {old_view: 'tool.view'}})\n"
+        const reported = () => vi.mocked(console.log).mock.calls.flat().join('\n')
+        const check = (code: string, ...entries: object[]) => {
+            vi.mocked(console.log).mockClear()
+            return checkBrowserStorage(repository({'src/a.ts': code, 'browser-storage.json': catalogue(...entries)}), options)
+        }
+
+        expect(check(current + cleanUp, retiredKey, retiredPrefix)).toBe(true)
+
+        expect(check(current + cleanUp + "localStorage.getItem('old_view')\n", retiredKey, retiredPrefix)).toBe(false)
+        expect(reported()).toContain("'old_view' is retired")
+
+        const live = {key: 'old_name_ABC', purpose: 'p', kind: 'LOCAL_STORAGE'}
+        expect(check(current + cleanUp + "localStorage.getItem('old_name_ABC')\n", retiredKey, retiredPrefix, live)).toBe(false)
+        expect(reported()).toContain("'old_name_ABC' is retired")
+
+        expect(check(current, retiredKey)).toBe(false)
+        expect(reported()).toContain("retired 'old_view' appears nowhere")
+    })
+
+    it('protect live keys and the shape of retired entries', () => {
+        const options = {catalogue: 'browser-storage.json', sources: 'src'}
+        const reported = () => vi.mocked(console.log).mock.calls.flat().join('\n')
+        const check = (code: string, ...entries: object[]) => {
+            vi.mocked(console.log).mockClear()
+            return checkBrowserStorage(repository({'src/a.ts': code, 'browser-storage.json': JSON.stringify({entries})}), options)
+        }
+        const colourMode = {key: 'vueuse-color-scheme', purpose: 'p', kind: 'LOCAL_STORAGE', source: '@emberbox/ui'}
+
+        expect(check("cleanUpStorage({remove: ['vueuse*']})\n", colourMode, {key: 'vueuse*', purpose: 'p', kind: 'LOCAL_STORAGE', retired: true})).toBe(false)
+        expect(reported()).toContain("covers the live key 'vueuse-color-scheme'")
+
+        expect(check('export {}\n', colourMode, {key: 'tool_*', purpose: 'p', kind: 'LOCAL_STORAGE'})).toBe(false)
+        expect(check("cleanUpStorage({remove: ['ls_*_name']})\n", colourMode, {key: 'ls_*_name', purpose: 'p', kind: 'LOCAL_STORAGE', retired: true})).toBe(false)
+        expect(reported()).toContain("only a retired entry may end in '*'")
+
+        expect(check("cleanUpStorage({remove: ['old']})\n", colourMode, {key: 'old', purpose: 'p', kind: 'LOCAL_STORAGE', retired: true, source: '@emberbox/ui'})).toBe(false)
+        expect(reported()).toContain("'old' is retired, so it must not name a source")
+    })
+
+    it('count the storage key of a component as one of the project', () => {
+        const options = {catalogue: 'browser-storage.json', sources: 'src'}
+        const sections = '<template><CollapsibleSection storage-key="tool_sections"/></template>\n'
+        const own = JSON.stringify({entries: [{key: 'tool_sections', purpose: 'p', kind: 'LOCAL_STORAGE'}]})
+        expect(checkBrowserStorage(repository({'src/A.vue': sections, 'browser-storage.json': own}), options)).toBe(true)
+        expect(checkBrowserStorage(repository({'src/A.vue': sections, 'browser-storage.json': '{"entries": []}'}), options)).toBe(false)
+    })
 })

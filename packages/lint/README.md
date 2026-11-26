@@ -71,6 +71,12 @@ export default {
   as `@emberbox/ui`'s colour mode `vueuse-color-scheme`, is declared with `"source": "@emberbox/ui"`; it is
   listed for completeness and not expected in the project's own code. Entries with a `source` are not
   checked against the dependency, so remove one when the dependency stops storing its key.
+  An entry with `"retired": true` names a key the project no longer reads and only removes or moves at
+  startup (`cleanUpStorage` from `@emberbox/ui`); only its key may end in `*`, for a prefix, and it
+  takes no `source`. The check fails if the code still reads or writes it, if it covers a live entry
+  (its clean-up would delete that value), or if its key appears nowhere in the sources any more: then
+  the clean-up is gone and the entry goes too. Keys passed as `storage-key` to `@emberbox/ui`
+  components such as `CollapsibleSection` count as the project's own and need an entry without `source`.
 - `duplication`: a jscpd config file, relative to the working directory.
 
 ## License

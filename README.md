@@ -99,6 +99,23 @@ incident (`INCIDENT_MARK_KINDS`) or a point of the water supply (`WATER_SUPPLY_M
 `TacticalSymbol` shows such a tree in the page (`symbol` prop), so the theme's signal red applies;
 `unitSymbol` and `markSymbol` give the same symbols as SVG strings for map icons.
 
+## Polling and browser storage
+
+```ts
+const {connected, refresh, stop} = usePolling(fetchState, {intervalMs: 2000, maxIntervalMs: 10_000, hiddenIntervalMs: 30_000})
+const poller = createPoller(exchange, {intervalMs: 2000, hiddenIntervalMs: 30_000})
+cleanUpStorage({remove: ['tool_name_*'], move: {old_view: 'tool.view'}})
+```
+
+- `usePolling` polls while a component is mounted; `createPoller` is the same loop for a store, with `start`,
+  `stop` and `refresh`. One request runs at a time, failures double the wait up to `maxIntervalMs`, and
+  `refresh` resolves once a request started after the call has completed.
+- A hidden tab pauses, or with `hiddenIntervalMs` keeps polling at that slower pace, for a heartbeat or
+  a shared document that should not fall too far behind. Coming back polls at once.
+- `cleanUpStorage` runs once at startup: it moves values from retired keys to their new names unless the new
+  key is already set, and deletes keys or prefixes ending in `*` that the tool no longer reads. List both
+  in `browser-storage.json` with `"retired": true`.
+
 ## Logo, app, SEO and prerendering
 
 ```ts

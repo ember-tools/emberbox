@@ -1,6 +1,7 @@
 {
   "entries": [
     {"key": "probe.choice", "purpose": "Die zuletzt gewählte Option.", "kind": "LOCAL_STORAGE"},
-    {"key": "vueuse-color-scheme", "purpose": "Hell oder dunkel.", "kind": "LOCAL_STORAGE", "source": "@emberbox/ui"}
+    {"key": "vueuse-color-scheme", "purpose": "Hell oder dunkel.", "kind": "LOCAL_STORAGE", "source": "@emberbox/ui"},
+    {"key": "probe.old_*", "purpose": "Früher je Übung gemerkte Namen.", "kind": "LOCAL_STORAGE", "retired": true}
   ]
 }
