@@ -86,7 +86,7 @@ Every build contains `build.json`. The backend serves it at the root without cac
 (`Cache-Control: no-store`), so open pages notice a new build.
 
 Further building blocks: `CodeDisplay`, `useConfirm`, `usePolling` and the help components
-`HelpPage`, `HelpSection`, `HelpTopic`, `HelpMockup`. Form fields with a label: `TextField` (with optional
+`HelpPage`, `HelpIndex`, `HelpSection`, `HelpTopic`, `HelpMockup`. Form fields with a label: `TextField` (with optional
 suggestions), `TextAreaField`, `ComboboxField` (free text plus a suggestion list, optionally
 filtered by the server), `YesNoField` (configurable values and labels), `DateTimeField` (date and
 time as two strings in German notation) and `CollapsibleSection`, which remembers whether it was
@@ -139,6 +139,30 @@ cleanUpStorage({remove: ['tool_name_*'], move: {old_view: 'tool.view'}})
   key is already set, and deletes keys or prefixes ending in `*` that the tool no longer reads. List both
   in `browser-storage.json` with `"retired": true`.
 
+## Help centers
+
+A help center is an overview at `/hilfe` and one page per topic at `/hilfe/<slug>`, each prerendered and in
+the sitemap. The topics are plain data (`{slug, title, description}`) in a file both the views and
+`vite.config.ts` import; a tool whose texts come from vue-i18n keeps only the slugs there (`helpPaths` takes
+them as they are) and builds the topics with `t()` in a `computed`. That file must not import from
+`@emberbox/ui` itself, only from `@emberbox/ui/vite`, which also has `HelpTopicInfo` and `helpPath`:
+
+```ts
+// vite.config.ts
+import {emberbox, helpPaths} from '@emberbox/ui/vite'
+emberbox({prerender: {entry: 'src/prerender.ts', paths: ['/', ...helpPaths(HELP_TOPICS)]}})
+```
+
+- The overview renders `<HelpPage title="Hilfe"><HelpIndex :topics="HELP_TOPICS"/></HelpPage>`.
+- A topic page renders `<HelpPage :title :topics="HELP_TOPICS" :current="slug">`: it lists the other topics,
+  leads back to the overview and on to the next topic. Its `usePage` takes `breadcrumbData([...])` for the trail
+  tool, Hilfe, topic.
+- `helpPath(slug)` builds the addresses.
+- Topic pages usually share one route `/hilfe/:slug`, so the component stays mounted from topic to topic: pass
+  `usePage` a getter (`usePage(() => ({...}))`) so title, canonical and breadcrumb follow, send unknown slugs
+  back to `/hilfe` in a `router.beforeEach` (a route's `beforeEnter` misses a jump from topic to topic), and give the router `scrollBehavior: (_to, _from, saved) => saved ?? {top: 0}`
+  so 'Weiter' opens the next topic at the top.
+
 ## Logo, app, SEO and prerendering
 
 ```ts
@@ -157,8 +181,9 @@ emberbox({
   the logo with `logo="/favicon.svg"`.
 - `app` makes the tool installable as an app: it writes `manifest.webmanifest` (standalone, starting
   at `/`, the logo as regular and maskable icon in 192 and 512 px) and links it with the theme colour.
-  It needs `logo`. There is no service worker, so the installed app always loads from the server and
-  updates arrive through the new-build banner as in the browser.
+  It needs `logo`; `startUrl` opens the installed app elsewhere than `/`, for a tool whose start page is
+  public. There is no service worker, so the installed app always loads from the server and updates arrive
+  through the new-build banner as in the browser.
 - `usePage({title, description, path, index, image, structuredData})` sets a page's title,
   description, canonical URL, OpenGraph and `robots`; `webApplicationData(...)` provides matching
   JSON-LD.

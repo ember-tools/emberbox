@@ -41,6 +41,14 @@ expect(start.includes('vueuse-color-scheme'), 'start page has no colour mode scr
 const help = read('pages/hilfe/index.html')
 expect(help.includes('Probe-Hilfe'), 'help page has no content')
 expect(help.includes('href="https://probe.emberbox.app/hilfe"'), 'help page has no canonical')
+expect(/href="\/"[^>]*>(<!--[^>]*-->)*\s*Zurück\s*</.test(help), 'help overview lost its way back to the start')
+expect(help.includes('href="/hilfe/drucken"') && help.includes('So kommt das Ergebnis aufs Papier.'), 'help overview does not list its topics')
+
+const topic = read('pages/hilfe/anlegen/index.html')
+expect(topic.includes('href="https://probe.emberbox.app/hilfe/anlegen"'), 'help topic has no canonical')
+expect(topic.includes('"BreadcrumbList"'), 'help topic has no breadcrumb data')
+expect(topic.includes('aria-current="page"') && topic.includes('Weiter: Drucken'), 'help topic has no topic navigation')
+expect(read('sitemap.xml').includes('https://probe.emberbox.app/hilfe/drucken'), 'sitemap lacks the help topics')
 
 const shell = read('index.html')
 expect(shell.includes('<div id="app"></div>'), 'index.html is no longer the empty shell')
@@ -57,7 +65,7 @@ for (const file of ['favicon.svg', 'apple-touch-icon.png', 'logo-192.png', 'logo
     expect(existsSync(join(dist, file)), `${file} is missing`)
 }
 const manifest = JSON.parse(read('manifest.webmanifest'))
-expect(manifest.name === 'Probe' && manifest.display === 'standalone' && manifest.start_url === '/', 'manifest has the wrong name, display or start')
+expect(manifest.name === 'Probe' && manifest.display === 'standalone' && manifest.start_url === '/hilfe', 'manifest has the wrong name, display or start')
 expect(manifest.icons.some(icon => icon.purpose === 'maskable' && icon.sizes === '512x512'), 'manifest has no maskable icon')
 expect(shell.includes('rel="manifest"') && shell.includes('name="theme-color"'), 'index.html does not link the manifest and theme colour')
 expect(start.includes('rel="manifest"'), 'prerendered start page does not link the manifest')

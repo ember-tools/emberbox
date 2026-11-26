@@ -10,6 +10,7 @@ import {prerenderPlugin, type PrerenderOptions} from './vite/prerender.js'
 export {PAGES_DIR, type PrerenderOptions} from './vite/prerender.js'
 export type {Logo} from './vite/logo.js'
 export type {AppOptions} from './vite/manifest.js'
+export {HELP_PATH, helpPath, helpPaths, type HelpTopicInfo} from './help.js'
 
 /** Settings a tool passes to `emberbox()`. */
 export interface EmberboxOptions {
