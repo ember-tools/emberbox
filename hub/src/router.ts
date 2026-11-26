@@ -11,6 +11,7 @@ const development: RouteRecordRaw[] = import.meta.env.DEV
     ? [
         {path: '/pattern', component: () => import('./pattern/PatternPage.vue'), meta: {bare: true}},
         {path: '/pattern/help', component: () => import('./pattern/HelpPatternPage.vue'), meta: {bare: true}},
+        {path: '/pattern/signs', component: () => import('./pattern/SignsPatternPage.vue'), meta: {bare: true}},
     ]
     : []
 

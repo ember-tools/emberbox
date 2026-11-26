@@ -4,7 +4,7 @@ import type {Plugin} from 'vite'
 import {type RootFile, rootFilesPlugin} from './root-files.js'
 
 /** The tools for which `@emberbox/ui` ships a logo. */
-export type Logo = 'emberbox' | 'alarmzettel' | 'statussim' | 'calltaker' | 'planspiel'
+export type Logo = 'emberbox' | 'alarmzettel' | 'statussim' | 'calltaker' | 'planspiel' | 'lernkarten'
 
 const LOGOS = fileURLToPath(new URL('../../logos/', import.meta.url))
 

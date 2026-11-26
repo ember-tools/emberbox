@@ -97,6 +97,7 @@ const columns: TableColumn<Unit>[] = [
     <template #nav>
       <ULink to="/pattern" class="text-highlighted">Muster</ULink>
       <ULink to="/pattern/help" class="text-muted">Hilfe</ULink>
+      <ULink to="/pattern/signs" class="text-muted">Zeichen</ULink>
     </template>
     <template #actions>
       <UButton size="sm" color="neutral" variant="outline" icon="i-lucide-plus" label="Neu"/>

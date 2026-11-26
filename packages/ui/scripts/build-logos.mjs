@@ -16,6 +16,7 @@ const TOOLS = {
     statussim: 'radio-tower',
     calltaker: 'headset',
     planspiel: 'map-pinned',
+    lernkarten: 'graduation-cap',
 }
 const SIGNAL = '#d5271b'
 const PNG_SIZES = [180, 192, 512]

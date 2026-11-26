@@ -6,3 +6,4 @@ dist/
 *.tgz
 auto-imports.d.ts
 components.d.ts
+.references/
