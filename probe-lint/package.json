@@ -1,0 +1,9 @@
+{
+  "name": "emberbox-lint-probe",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@emberbox/lint": "file:../emberbox-lint.tgz",
+    "eslint": "^10.15.0"
+  }
+}

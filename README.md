@@ -19,6 +19,7 @@ Requires [Nix](https://nixos.org) with direnv; `shell.nix` provides Node.
 ./toolchain.sh install
 ./toolchain.sh hub-dev      # pattern page at http://localhost:5173/pattern
 ./toolchain.sh lint         # emberbox-lint in the lint package, the library and the hub
+./toolchain.sh lint-probe   # the packed @emberbox/lint in an empty project
 ./toolchain.sh verify       # everything CI checks
 ```
 

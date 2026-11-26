@@ -31,7 +31,7 @@ jobs:
             exit 1
           fi
       - name: Verify
-        run: nix-shell --run "./toolchain.sh verify"
+        run: nix-shell --run "./toolchain.sh verify && ./toolchain.sh lint-probe"
       - name: Use the npm token while trusted publishing is not set up
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
