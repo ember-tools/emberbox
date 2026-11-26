@@ -40,6 +40,7 @@ export {
     type TacticalSignSpec, type VehicleBody,
 } from './symbols/signs'
 export {CATALOG_SOURCE, TACTICAL_SIGN_CATALOG, catalogSignTree, type CatalogEntry} from './symbols/catalog'
+export {ABILITIES, type Ability, type AbilityName, type AbilityPart} from './symbols/abilities'
 
 /**
  * Vue plugin that installs Nuxt UI in the Emberbox style. Icons come only from the bundled set; a

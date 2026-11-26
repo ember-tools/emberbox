@@ -102,12 +102,14 @@ incident (`INCIDENT_MARK_KINDS`) or a point of the water supply (`WATER_SUPPLY_M
 Tactical signs after the recommendations of the BBK (2024): `tacticalSignTree` builds a sign from
 its building blocks (`TacticalSignSpec`: basic form, organisation colour in a filled, outline or
 black and white style, unit size or association, supplementary signs, how a vehicle runs, what it
-carries or how it flies, writing). `TACTICAL_SIGN_CATALOG` lists the signs of chapters 1–3, 5.1,
-5.4 and 5.5 with number, name and printed page, plus the library's own water supply marks as
-`W.1`–`W.5` with `recommended: false`; `catalogSignTree` draws any entry. Name `CATALOG_SOURCE`
-wherever they are shown. The hub's test bench at `/pattern/signs` draws the catalogue, and
-`./toolchain.sh sign-references` renders the pages of the recommendations into `.references/` to
-compare.
+carries or how it flies, writing). `abilities` adds the symbols of chapter 4 (`ABILITIES`), stacked
+from the bottom up, and `designation` the short name in the upper left corner.
+`TACTICAL_SIGN_CATALOG` lists the signs of chapters 1–4, 5.1, 5.4, 5.5 and the fire service
+examples of annex C with number, name and printed page, plus the library's own water supply marks
+as `W.1`–`W.5` with `recommended: false`; `catalogSignTree` draws any entry. Name
+`CATALOG_SOURCE` wherever they are shown. The hub's test bench at `/pattern/signs` draws the
+catalogue, and `./toolchain.sh sign-references` renders the pages of the recommendations into
+`.references/` to compare.
 
 ## Polling and browser storage
 

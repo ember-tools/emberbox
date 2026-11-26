@@ -51,6 +51,9 @@ export function renderSvg(node: SvgElement): string {
     return content ? `<${node.tag}${attributes}>${content}</${node.tag}>` : `<${node.tag}${attributes}/>`
 }
 
+/** The type every piece of writing in a symbol is set in. */
+export const SIGN_FONT: Attributes = {'font-weight': 700, 'font-family': 'Barlow Condensed, Barlow, sans-serif'}
+
 /** Writing at a point, squeezed to `maxWidth` when it is long. */
 export function label(text: string, x: number, y: number, colour: string, maxWidth = MAX_TEXT_WIDTH, size?: number): SvgElement {
     const fontSize = size ?? (text.length > 8 ? 17 : 22)
@@ -60,8 +63,7 @@ export function label(text: string, x: number, y: number, colour: string, maxWid
     return {
         tag: 'text',
         attributes: {
-            x, y, fill: colour, 'font-size': fontSize, 'font-weight': 700,
-            'font-family': 'Barlow Condensed, Barlow, sans-serif', 'text-anchor': 'middle',
+            x, y, fill: colour, 'font-size': fontSize, ...SIGN_FONT, 'text-anchor': 'middle',
             'dominant-baseline': 'central', ...squeeze,
         },
         text,
