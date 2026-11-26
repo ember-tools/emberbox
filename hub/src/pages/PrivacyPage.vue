@@ -146,8 +146,8 @@ const {details, state} = useLegalDetails()
       </p>
       <p class="m-0">
         Für die Höhen schickt der Browser den Verlauf der Leitung an unseren Server. Der Server liest die Höhen aus
-        einer eigenen Kopie des Höhenmodells Copernicus DEM; kein anderer Dienst erhält die Koordinaten. Der Server
-        speichert sie nicht und protokolliert sie nicht.
+        einer eigenen Kopie eines digitalen Geländemodells für Deutschland; kein anderer Dienst erhält die
+        Koordinaten. Der Server speichert sie nicht und protokolliert sie nicht.
       </p>
       <p class="m-0">
         Wer eine Strecke oder Aufgabe teilt, legt eine Kopie davon mit dem Zeitpunkt der Erstellung auf dem Server
