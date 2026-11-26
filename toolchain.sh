@@ -37,7 +37,9 @@ Usage: ./toolchain.sh <command> [args...]
   hub-typecheck   vue-tsc for the hub
   hub-build       Type check and production build of the hub
   hub-image       Build the hub container image locally as emberbox-hub:local
-  verify          ui-build, ui-typecheck, ui-icons and hub-build
+  lint-test       Tests of @emberbox/lint
+  lint            emberbox-lint in the lint package, the library and the hub
+  verify          ui-build, ui-typecheck, ui-icons, lint-test, lint and hub-build
 TEXT
 }
 
@@ -69,10 +71,19 @@ case "$command" in
     hub-typecheck) run npm run -w @emberbox/hub typecheck ;;
     hub-build) run npm run -w @emberbox/hub build ;;
     hub-image) docker build -f hub/Dockerfile --build-arg COMMIT="$(git rev-parse --short HEAD)" -t emberbox-hub:local . ;;
+    lint-test) run npm run -w @emberbox/lint test ;;
+    lint)
+        for workspace in packages/lint packages/ui hub; do
+            (cd "$ROOT/$workspace" && run node "$ROOT/packages/lint/src/cli/main.mjs" "$@") || failed=1
+        done
+        exit "${failed:-0}"
+        ;;
     verify)
         "$0" ui-build
         "$0" ui-typecheck
         "$0" ui-icons
+        "$0" lint-test
+        "$0" lint
         "$0" hub-build
         ;;
     help | -h | --help) usage ;;

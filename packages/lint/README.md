@@ -23,7 +23,10 @@ export default await emberboxEslint({
 The config brings Vue, TypeScript and accessibility as recommended and the Emberbox conventions:
 script, template and style in that order, self-closing empty elements, no `v-html`, no leftover
 `console.log`, named state types, functions of at most 79 lines, and for templates outside
-`components/` no class pattern repeated across the views and no oversized template blocks.
+`components/` no class pattern repeated across the views and no oversized template blocks. Undefined
+names in TypeScript and Vue files are left to the type checker (`vue-tsc` or `tsc`), which knows
+auto-imported names such as Nuxt UI's composables; run it alongside, since ESLint does not report
+them there. JavaScript files are still checked by `no-undef`.
 
 | Option | Default | Meaning |
 |---|---|---|

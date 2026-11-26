@@ -10,7 +10,7 @@ import {onMounted, ref, useId, watch} from 'vue'
  * mounting, so prerendered pages hydrate with `defaultOpen` first.
  */
 const {
-  name, title, count, icon, defaultOpen = false, storageKey = 'emberbox_sections', level = 2,
+  name, title, count = undefined, icon = undefined, defaultOpen = false, storageKey = 'emberbox_sections', level = 2,
 } = defineProps<{
   /** Key under which the state is remembered. */
   name: string

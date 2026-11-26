@@ -14,7 +14,7 @@ withDefaults(defineProps<{
   subtitle?: string
   home?: string
   logo?: string
-}>(), {home: '/'})
+}>(), {subtitle: undefined, home: '/', logo: undefined})
 </script>
 
 <template>
@@ -23,7 +23,7 @@ withDefaults(defineProps<{
       <div class="flex shrink-0 items-center gap-3">
         <ULink :to="HUB_URL" class="flex size-8 items-center justify-center rounded-sm text-muted hover:text-highlighted"
                aria-label="Alle Werkzeuge auf emberbox.app">
-          <img v-if="logo" :src="logo" alt="" class="size-8 rounded-sm">
+          <img v-if="logo" :src="logo" alt="" class="size-8 rounded-sm" />
           <UIcon v-else name="i-lucide-layout-grid" class="size-5"/>
         </ULink>
         <ULink :to="home" class="flex items-baseline gap-2 text-highlighted hover:text-highlighted">

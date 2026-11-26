@@ -50,6 +50,12 @@ describe('emberboxEslint', () => {
         expect(rules).toEqual(['@intlify/vue-i18n/no-raw-text'])
     })
 
+    it('leaves undefined names in TypeScript to the type checker, which knows the auto-imports', async () => {
+        const code = '<script setup lang="ts">\nconst toast = useToast()\ntoast.add({title: \'x\'})\n</script>\n'
+        expect(await reported({}, 'src/views/Toast.vue', code)).not.toContain('no-undef')
+        expect(await reported({}, 'src/plain.mjs', 'export const toast = useToast()\n')).toContain('no-undef')
+    })
+
     it('enforces the import boundaries between layers', async () => {
         writeFileSync(join(root, 'src/views/helper.ts'), 'export const helper = 1\n')
         const code = "import {helper} from '../views/helper'\n\nexport const model = helper\n"

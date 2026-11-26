@@ -22,8 +22,11 @@ const props = defineProps<{
 const FEEDBACK_MS = 1500
 
 const revealed = ref(false)
-const result = ref<{ what: 'code' | 'link', succeeded: boolean } | null>(null)
-const qrImage = computed(() => renderSVG(props.link ?? props.code, {border: 1}))
+/** What the last copy was and whether it worked. */
+type CopyResult = { what: 'code' | 'link', succeeded: boolean }
+
+const result = ref<CopyResult | null>(null)
+const qrImage = computed(() => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(renderSVG(props.link ?? props.code, {border: 1}))}`)
 let timer: ReturnType<typeof setTimeout> | undefined
 
 const message = computed(() => result.value === null
@@ -68,8 +71,7 @@ onBeforeUnmount(() => clearTimeout(timer))
       <UPopover v-if="qr">
         <UButton icon="i-lucide-qr-code" color="neutral" variant="ghost" size="sm" :aria-label="`QR-Code für ${title}`"/>
         <template #content>
-          <div class="size-56 bg-white p-2 text-black [&>svg]:size-full" role="img" :aria-label="`QR-Code für ${title}`"
-               v-html="qrImage"/>
+          <img :src="qrImage" :alt="`QR-Code für ${title}`" width="224" height="224" class="size-56 bg-white p-2"/>
         </template>
       </UPopover>
       <span class="sr-only" role="status">{{ message }}</span>

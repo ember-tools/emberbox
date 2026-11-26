@@ -119,7 +119,8 @@ function keepOffCatalogue(catalogue) {
 /**
  * The ESLint flat config of an Emberbox frontend.
  *
- * <p>Vue, TypeScript and accessibility as recommended, the Emberbox Vue conventions, no leftover
+ * <p>Vue, TypeScript and accessibility as recommended, without `no-undef` for TypeScript and Vue
+ * files, whose names the type checker resolves, auto-imports included; the Emberbox Vue conventions, no leftover
  * `console.log`, named state types, functions of at most `maxFunctionLines` lines, and for the
  * templates outside `components/` no repeated class patterns and no oversized blocks. With a
  * `catalogue`, every user-visible text goes through vue-i18n and the catalogue is checked; without
@@ -158,6 +159,7 @@ export async function emberboxEslint(options = {}) {
             languageOptions: {parserOptions: {parser: tseslint.parser, extraFileExtensions: ['.vue']}},
         },
         {name: 'emberbox/globals', languageOptions: {globals: globals.browser}},
+        {name: 'emberbox/typescript-names', files: ['**/*.ts', '**/*.vue'], rules: {'no-undef': 'off'}},
         {name: 'emberbox/node', files: [...NODE_FILES, ...nodeFiles], languageOptions: {globals: {...globals.node}}},
         ...vueA11y.configs['flat/recommended'],
         {

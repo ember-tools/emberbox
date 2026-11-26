@@ -7,6 +7,8 @@ This repository contains:
 
 - **`packages/ui`** – `@emberbox/ui`, the shared look of the Emberbox tools. Built on
   [Nuxt UI](https://ui.nuxt.com), it brings Nuxt UI's components in the Emberbox style.
+- **`packages/lint`** – `@emberbox/lint`, the shared linters: an ESLint config with the Emberbox
+  rules and `emberbox-lint`, which also checks comments, em dashes, browser storage and duplication.
 - **`hub`** – the emberbox.app start page.
 
 ## Development
@@ -16,6 +18,7 @@ Requires [Nix](https://nixos.org) with direnv; `shell.nix` provides Node.
 ```sh
 ./toolchain.sh install
 ./toolchain.sh hub-dev      # pattern page at http://localhost:5173/pattern
+./toolchain.sh lint         # emberbox-lint in the lint package, the library and the hub
 ./toolchain.sh verify       # everything CI checks
 ```
 

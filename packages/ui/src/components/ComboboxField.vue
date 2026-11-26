@@ -22,7 +22,10 @@ const emit = defineEmits<{ change: [] }>()
 const model = defineModel<string>({default: ''})
 const id = useId()
 const labelId = `${id}-label`
-const input = ref<{ inputRef: HTMLInputElement | null }>()
+/** The part of Nuxt UI's input that exposes the native element. */
+type InputHandle = { inputRef: HTMLInputElement | null }
+
+const input = ref<InputHandle>()
 const open = ref(false)
 
 /** Which entry the arrow keys are on, or -1 while the typing stands on its own. */
@@ -121,6 +124,7 @@ watch(filtered, () => (active.value = -1))
     <ul v-if="visible" :id="`${id}-list`" role="listbox" :aria-labelledby="labelId"
         class="absolute inset-x-0 top-full z-30 mt-1 max-h-64 overflow-auto rounded-sm border border-default bg-default py-1 shadow-lg">
       <li v-for="(value, index) in filtered" :id="optionId(index)" :key="`${index}-${value}`" role="option"
+          tabindex="-1"
           :aria-selected="index === active"
           class="cursor-pointer px-3 py-1.5 text-sm"
           :class="[index === active ? 'bg-elevated' : '', value === model ? 'font-semibold' : '']"
