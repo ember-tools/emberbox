@@ -1,7 +1,7 @@
 /**
- * Tactical symbols after DIN 14034-6 and the recommendations of the BBK for DV 102. The drawings
- * follow the system of the recommendations (basic form, size mark, writing) without copying their
- * artwork.
+ * Tactical symbols after the recommendations "Taktische Zeichen im Bevölkerungsschutz" of the BBK
+ * (2024, for FwDV 102 / DV 102). The drawings follow the system of the recommendations (basic form,
+ * size mark, writing) without copying their artwork.
  *
  * A symbol is built as a tree of SVG elements: `TacticalSymbol` renders the tree as Vue nodes in
  * the page, and `renderSvg` writes it as an escaped string for map icons. Every symbol is drawn on
@@ -14,10 +14,13 @@
 /** The organisation a unit belongs to, which sets its colours. */
 export type Organisation = 'fire' | 'medical'
 
-/** The basic form of a unit's symbol. */
-export type SymbolShape = 'vehicle' | 'container' | 'trailer' | 'boat' | 'unit'
+/**
+ * The basic form of a unit's symbol. `squad` is not part of the recommendations: a compact,
+ * rounded form that sets a dismounted squad apart from vehicles on a busy map.
+ */
+export type SymbolShape = 'vehicle' | 'container' | 'trailer' | 'boat' | 'unit' | 'squad'
 
-/** The size of a unit, shown by dots or a bar above its symbol. */
+/** The size of a tactical unit, shown by dots above its symbol: Trupp, Staffel, Gruppe, Zug. */
 export type UnitSize = 'squad' | 'section' | 'group' | 'platoon'
 
 /** Marks of places and events of an incident. */
@@ -57,6 +60,7 @@ const RED = 'var(--color-signal-500)'
 const WHITE = 'white'
 const STROKE = 3
 const MAX_TEXT_WIDTH = 86
+const SQUAD_TEXT_WIDTH = 62
 
 interface Colours {
     fill: string
@@ -108,10 +112,10 @@ export function renderSvg(node: SvgElement): string {
 }
 
 /** The writing inside a symbol, squeezed to fit when it is long. */
-function label(text: string, x: number, y: number, colour: string): SvgElement {
+function label(text: string, x: number, y: number, colour: string, maxWidth = MAX_TEXT_WIDTH): SvgElement {
     const size = text.length > 8 ? 17 : 22
-    const squeeze: Attributes = text.length * size * 0.5 > MAX_TEXT_WIDTH
-        ? {textLength: MAX_TEXT_WIDTH, lengthAdjust: 'spacingAndGlyphs'}
+    const squeeze: Attributes = text.length * size * 0.5 > maxWidth
+        ? {textLength: maxWidth, lengthAdjust: 'spacingAndGlyphs'}
         : {}
     return {
         tag: 'text',
@@ -124,13 +128,18 @@ function label(text: string, x: number, y: number, colour: string): SvgElement {
     }
 }
 
-/** The dots or bar above a unit that tell its size. */
+/** Where the dots of each unit size sit above the symbol: one, two stacked, two apart, three in a row. */
+const SIZE_DOTS: Record<UnitSize, [number, number][]> = {
+    squad: [[60, 6]],
+    section: [[60, 3], [60, 10]],
+    group: [[52, 6], [68, 6]],
+    platoon: [[50, 6], [60, 6], [70, 6]],
+}
+
+/** The dots above a unit that tell its size, after the BBK recommendations of 2010 and 2024 alike. */
 function sizeMark(size: UnitSize | undefined, colour: string): SvgElement[] {
     if (!size) return []
-    if (size === 'platoon') return [element('line', {x1: 60, y1: 1, x2: 60, y2: 11, ...stroked(colour)})]
-    const count = {squad: 1, section: 2, group: 3}[size]
-    return Array.from({length: count}, (_, index) =>
-        element('circle', {cx: 60 + (index - (count - 1) / 2) * 10, cy: 6, r: 3.5, fill: colour}))
+    return SIZE_DOTS[size].map(([cx, cy]) => element('circle', {cx, cy, r: 3, fill: colour}))
 }
 
 /** The basic form of a unit's symbol, with the writing inside. */
@@ -157,10 +166,12 @@ function body(shape: SymbolShape, colour: Colours, text: string): SvgElement[] {
             return [element('path', {d: 'M10 16 H110 L100 56 Q60 72 20 56 Z', ...outline}), label(text, 60, 36, colour.text)]
         case 'unit':
             return [element('rect', {x: 10, y: 16, width: 100, height: 52, ...outline}), label(text, 60, 42, colour.text)]
+        case 'squad':
+            return [element('rect', {x: 24, y: 18, width: 72, height: 46, rx: 14, ...outline}), label(text, 60, 41, colour.text, SQUAD_TEXT_WIDTH)]
     }
 }
 
-/** The symbol of a unit: a vehicle, container, trailer, boat or squad. */
+/** The symbol of a unit: a vehicle, container, trailer, boat, unit or dismounted squad. */
 export function unitSymbolTree(spec: SymbolSpec): SvgElement {
     const colour = colours(spec.organisation)
     return canvas([...sizeMark(spec.size, colour.line), ...body(spec.shape, colour, spec.text)])

@@ -17,7 +17,9 @@ const symbolUnits = [
   {shape: 'container', organisation: 'fire', text: 'AB-Schlauch'},
   {shape: 'trailer', organisation: 'fire', text: 'TS'},
   {shape: 'boat', organisation: 'fire', text: 'MZB'},
-  {shape: 'unit', organisation: 'fire', text: 'AT', size: 'squad'},
+  {shape: 'unit', organisation: 'fire', text: 'Zug', size: 'platoon'},
+  {shape: 'unit', organisation: 'fire', text: 'Staffel', size: 'section'},
+  {shape: 'squad', organisation: 'fire', text: 'AT', size: 'squad'},
 ] satisfies SymbolSpec[]
 
 const text = ref('')
