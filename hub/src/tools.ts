@@ -1,6 +1,7 @@
 import alarmzettel from '@emberbox/ui/logos/alarmzettel.svg'
 import calltaker from '@emberbox/ui/logos/calltaker.svg'
 import foerderstrecke from '@emberbox/ui/logos/foerderstrecke.svg'
+import lernkarten from '@emberbox/ui/logos/lernkarten.svg'
 import planspiel from '@emberbox/ui/logos/planspiel.svg'
 import statussim from '@emberbox/ui/logos/statussim.svg'
 
@@ -90,5 +91,16 @@ export const TOOLS: Tool[] = [
         source: 'https://github.com/ember-tools/foerderstrecke',
         license: 'AGPL-3.0',
         help: 'https://foerderstrecke.emberbox.app/hilfe',
+    },
+    {
+        name: 'Lernkarten',
+        url: 'https://lernkarten.emberbox.app',
+        description: 'Taktische Zeichen und Gefahrgut lernen: Lernkarten mit Wiederholung in Fächern, Quiz, ein Baukasten für Zeichen und Nachschlageseiten.',
+        logo: lernkarten,
+        audiences: ['Jugendfeuerwehr', 'Einsatzabteilung'],
+        category: 'EducationalApplication',
+        source: 'https://github.com/ember-tools/lernkarten',
+        license: 'AGPL-3.0',
+        help: 'https://lernkarten.emberbox.app/hilfe',
     },
 ]
