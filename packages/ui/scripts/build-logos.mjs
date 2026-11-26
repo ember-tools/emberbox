@@ -13,6 +13,7 @@ const TOOLS = {
     alarmzettel: 'clipboard-list',
     statussim: 'radio-tower',
     calltaker: 'headset',
+    planspiel: 'map-pinned',
 }
 const SIGNAL = '#d5271b'
 const PNG_SIZES = [180, 512]

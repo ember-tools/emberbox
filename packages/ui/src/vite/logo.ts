@@ -3,7 +3,7 @@ import {fileURLToPath} from 'node:url'
 import type {Plugin} from 'vite'
 
 /** The tools for which `@emberbox/ui` ships a logo. */
-export type Logo = 'emberbox' | 'alarmzettel' | 'statussim' | 'calltaker'
+export type Logo = 'emberbox' | 'alarmzettel' | 'statussim' | 'calltaker' | 'planspiel'
 
 const LOGOS = fileURLToPath(new URL('../../logos/', import.meta.url))
 
