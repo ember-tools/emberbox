@@ -163,9 +163,17 @@ behind Traefik at `emberbox.app`.
 
 ## Publishing
 
-`@emberbox/ui` is published to npmjs when a tag `ui-vX.Y.Z` matching the version in
-`packages/ui/package.json` is pushed on `main`. npm trusts the workflow `publish-ui.yml` as
-publisher (trusted publishing), so no token is needed.
+Each package is published to npmjs when a tag matching its version is pushed on `main`:
+
+| Package | Tag | Workflow |
+|---|---|---|
+| `@emberbox/ui` | `ui-vX.Y.Z` | `publish-ui.yml` |
+| `@emberbox/lint` | `lint-vX.Y.Z` | `publish-lint.yml` |
+
+npm trusts these workflows as publishers (trusted publishing), so no token is needed. Trusted
+publishing can only be set up for a package that already exists, so `publish-lint.yml` uses the
+repository secret `NPM_TOKEN` while it is set; delete the secret once trusted publishing is set up
+for `@emberbox/lint`.
 
 The logo pictograms come from [Lucide](https://lucide.dev) (ISC); `./toolchain.sh ui-logos`
 regenerates them.
