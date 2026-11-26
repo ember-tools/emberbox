@@ -11,6 +11,7 @@ export default {
         {path: 'hub/eslint.config.mjs', extensions: null},
         {path: 'hub/emberbox-lint.config.mjs', extensions: null},
         {path: 'probe', extensions: ['.ts', '.vue', '.mjs']},
+        {path: 'probe-lint', extensions: ['.ts', '.vue', '.mjs']},
     ],
     text: [
         {path: 'hub/index.html', extensions: null},

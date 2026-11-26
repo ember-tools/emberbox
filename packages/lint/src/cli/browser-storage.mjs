@@ -50,7 +50,9 @@ function keysIn(content) {
 
 /**
  * Compares the keys the code uses with the catalogue: every used key must be declared, every
- * declared key used, and every key a literal or a constant of the same file.
+ * declared key used, and every key a literal or a constant of the same file. An entry with a
+ * `source`, the package that stores the key on the project's behalf (such as `@emberbox/ui` for the
+ * colour mode), is declared so the catalogue is complete, and is not expected in the project's code.
  *
  * @param root the absolute repository root
  * @param options `catalogue`, the catalogue file, and `sources`, the source folder, both relative to the root
@@ -59,7 +61,9 @@ function keysIn(content) {
 export function checkBrowserStorage(root, {catalogue, sources}) {
     const reporter = createReporter(root)
     const catalog = JSON.parse(readFileSync(join(root, catalogue), 'utf-8'))
-    const declared = new Set((catalog.entries ?? []).map(entry => entry.key))
+    const entries = catalog.entries ?? []
+    const declared = new Set(entries.map(entry => entry.key))
+    const fromDependencies = new Set(entries.filter(entry => entry.source).map(entry => entry.key))
     const used = new Map()
     const folder = join(root, sources)
     for (const file of [...walk(folder, '.ts'), ...walk(folder, '.vue')]) {
@@ -73,8 +77,11 @@ export function checkBrowserStorage(root, {catalogue, sources}) {
     for (const [key, file] of used) {
         if (!declared.has(key)) reporter.error(file, 0, `browser storage key '${key}' is not declared in ${catalogue}`, 'undeclared')
     }
+    for (const key of fromDependencies) {
+        if (used.has(key)) reporter.error(catalogue, 0, `browser storage key '${key}' is used by this project's own code, so it must not name a source`, 'source')
+    }
     for (const key of declared) {
-        if (!used.has(key)) reporter.error(catalogue, 0, `declared browser storage key '${key}' is no longer used`, 'stale')
+        if (!used.has(key) && !fromDependencies.has(key)) reporter.error(catalogue, 0, `declared browser storage key '${key}' is no longer used`, 'stale')
     }
     return reporter.finish(`Browser storage lint passed. ${used.size} keys used, ${declared.size} declared in ${catalogue}.`)
 }

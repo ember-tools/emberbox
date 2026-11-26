@@ -1,0 +1,7 @@
+{
+  "path": ["src"],
+  "format": ["typescript", "vue"],
+  "minLines": 10,
+  "reporters": ["console"],
+  "threshold": 0.6
+}

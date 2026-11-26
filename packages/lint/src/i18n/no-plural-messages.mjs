@@ -8,8 +8,10 @@ const PLURAL = 1
  * Refuses a message vue-i18n reads as plural choices.
  *
  * <p>A bare `|` splits a message into choices, and `t()` then shows the first of them unless a
- * count is passed, so a pipe written as text silently cuts the sentence short. Nothing here passes
- * counts to pick a plural form, so every such message is a pipe that wanted escaping as `{'|'}`.
+ * count is passed, so a pipe written as text silently cuts the sentence short. In a project that
+ * passes no counts to pick a plural form, every such message is a pipe that wanted escaping as
+ * `{'|'}`; a project that uses plural messages turns this rule off with the config's `plurals`
+ * option.
  * The message is read by the compiler vue-i18n itself uses, not by pattern.
  *
  * @type {import('eslint').Rule.RuleModule}

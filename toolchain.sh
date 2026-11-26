@@ -39,6 +39,8 @@ Usage: ./toolchain.sh <command> [args...]
   hub-image       Build the hub container image locally as emberbox-hub:local
   lint-test       Tests of @emberbox/lint
   lint            emberbox-lint in the lint package, the library and the hub
+  lint-probe      Pack @emberbox/lint, install it into the project in probe-lint/, run every linter
+                  and check that a stray comment fails; EMBERBOX_PROBE_KEEP=1 keeps the directory
   verify          ui-build, ui-typecheck, ui-icons, lint-test, lint and hub-build
 TEXT
 }
@@ -53,6 +55,23 @@ case "$command" in
     ui-typecheck) run npm run -w @emberbox/ui typecheck ;;
     ui-icons) run npm run -w @emberbox/ui icons ;;
     ui-logos) run npm run -w @emberbox/ui logos ;;
+    lint-probe)
+        target="$(mktemp -d)"
+        [ -n "${EMBERBOX_PROBE_KEEP:-}" ] || trap 'rm -rf "$target"' EXIT
+        run npm pack -w @emberbox/lint --pack-destination "$target" >/dev/null
+        mv "$target"/emberbox-lint-*.tgz "$target/emberbox-lint.tgz"
+        cp -r probe-lint "$target/probe-lint"
+        cd "$target/probe-lint"
+        run npm install --no-audit --no-fund
+        run npx emberbox-lint
+        printf 'export const stray = 1 // remark\n' > src/stray.ts
+        status=0
+        output="$(run npx emberbox-lint comments 2>&1)" || status=$?
+        if [ "$status" -ne 1 ] || ! grep -q "src/stray.ts" <<<"$output"; then
+            echo "lint-probe: the comment check did not reject the stray comment (exit $status)" >&2
+            exit 1
+        fi
+        ;;
     ui-probe)
         "$0" ui-build
         target="$(mktemp -d)"

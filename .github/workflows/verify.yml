@@ -23,3 +23,5 @@ jobs:
         run: nix-shell --run "./toolchain.sh verify"
       - name: Probe the packed library
         run: nix-shell --run "./toolchain.sh ui-probe"
+      - name: Probe the packed linters
+        run: nix-shell --run "./toolchain.sh lint-probe"

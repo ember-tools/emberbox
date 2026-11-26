@@ -31,7 +31,8 @@ them there. JavaScript files are still checked by `no-undef`.
 | Option | Default | Meaning |
 |---|---|---|
 | `src` | `src` | the source directory |
-| `catalogue` | none | the German vue-i18n catalogue; with it every template text goes through the catalogue, and the catalogue is checked for missing, unused and plural messages |
+| `catalogue` | none | the German vue-i18n catalogue; with it every template text goes through the catalogue, and the catalogue is checked for missing, unused and plural messages (plural messages unless `plurals` is set) |
+| `plurals` | `false` | allow vue-i18n plural messages such as `{n} Alarm \| {n} Alarme`; without it a bare `\|` in the catalogue is an error, since it usually wanted escaping |
 | `layers` | `[]` | which source directories may not import from which |
 | `maxFunctionLines` | `79` | the longest function allowed |
 | `ignores`, `nodeFiles` | `[]` | further files to skip, or that run in Node |
@@ -66,7 +67,10 @@ export default {
   allowed, in TypeScript, Vue, JavaScript and Python.
 - `text`: further files only the em dash check reads.
 - `browserStorage`: a catalogue of every `localStorage` and `sessionStorage` key with its purpose;
-  every key the code uses must be declared, every declared key used.
+  every key the code uses must be declared, every declared key used. A key a dependency stores, such
+  as `@emberbox/ui`'s colour mode `vueuse-color-scheme`, is declared with `"source": "@emberbox/ui"`; it is
+  listed for completeness and not expected in the project's own code. Entries with a `source` are not
+  checked against the dependency, so remove one when the dependency stops storing its key.
 - `duplication`: a jscpd config file, relative to the working directory.
 
 ## License

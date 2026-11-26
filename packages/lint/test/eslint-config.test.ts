@@ -74,6 +74,14 @@ describe('emberboxEslint', () => {
         expect(await reported(options, 'src/views/Missing.vue', view)).toEqual(['@intlify/vue-i18n/no-missing-keys'])
     })
 
+    it('allows plural messages only when asked to', async () => {
+        const catalogue = "export default {list: {count: '{n} Alarm | {n} Alarme'}}\n"
+        const strict = await reported({cwd: root, catalogue: 'src/i18n/plurals.ts'}, 'src/i18n/plurals.ts', catalogue)
+        expect(strict).toContain('emberbox/i18n-no-plural-messages')
+        const relaxed = await reported({cwd: root, catalogue: 'src/i18n/plurals.ts', plurals: true}, 'src/i18n/plurals.ts', catalogue)
+        expect(relaxed).not.toContain('emberbox/i18n-no-plural-messages')
+    })
+
     it('counts repeated class patterns in the configured source directory, outside its components', async () => {
         mkdirSync(join(root, 'app', 'views'), {recursive: true})
         mkdirSync(join(root, 'app', 'components'), {recursive: true})

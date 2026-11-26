@@ -63,9 +63,10 @@ function layerZones(src, {layer, above}) {
  * @param src the source directory
  * @param catalogue the catalogue module
  * @param cwd the directory ESLint runs in
+ * @param plurals whether the catalogue may hold vue-i18n plural messages
  * @returns the config entries
  */
-async function i18nConfigs(src, catalogue, cwd) {
+async function i18nConfigs(src, catalogue, cwd, plurals) {
     const snapshots = await localeSnapshots(catalogue, cwd)
     const sourceRule = {
         name: 'emberbox/vue-i18n',
@@ -94,7 +95,7 @@ async function i18nConfigs(src, catalogue, cwd) {
         settings: {'vue-i18n': {localeDir: [snapshots, catalogue], messageSyntaxVersion: '^11.0.0'}},
         rules: {
             '@intlify/vue-i18n/valid-message-syntax': 'error',
-            'emberbox/i18n-no-plural-messages': 'error',
+            ...(plurals ? {} : {'emberbox/i18n-no-plural-messages': 'error'}),
             'emberbox/i18n-unused-keys': ['error', {sources: src, german: [{file: catalogue}]}],
         },
     }
@@ -131,6 +132,7 @@ function keepOffCatalogue(catalogue) {
  * @param {string} [options.cwd] the directory ESLint runs in, the working directory by default
  * @param {string} [options.src] the source directory, `src` by default
  * @param {string} [options.catalogue] the German catalogue module, such as `src/i18n/de.ts`
+ * @param {boolean} [options.plurals] allow vue-i18n plural messages such as `{n} Alarm | {n} Alarme`; without it a bare `|` in the catalogue is an error
  * @param {{layer: string, above: string[]}[]} [options.layers] import boundaries between source directories
  * @param {number} [options.maxFunctionLines] the longest function allowed, 79 by default
  * @param {string[]} [options.ignores] further files ESLint skips
@@ -138,8 +140,8 @@ function keepOffCatalogue(catalogue) {
  * @returns {Promise<import('eslint').Linter.Config[]>} the config
  */
 export async function emberboxEslint(options = {}) {
-    const {cwd = process.cwd(), src = 'src', catalogue, layers = [], maxFunctionLines = 79, ignores = [], nodeFiles = []} = options
-    const i18n = catalogue ? await i18nConfigs(src, catalogue, cwd) : {settings: {}, configs: []}
+    const {cwd = process.cwd(), src = 'src', catalogue, plurals = false, layers = [], maxFunctionLines = 79, ignores = [], nodeFiles = []} = options
+    const i18n = catalogue ? await i18nConfigs(src, catalogue, cwd, plurals) : {settings: {}, configs: []}
     return [
         {name: 'emberbox/ignores', ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'public/**', ...ignores]},
         {
