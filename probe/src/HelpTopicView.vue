@@ -20,7 +20,7 @@ usePage(() => ({
 
 <template>
   <HelpPage :title="topic.title" :topics="HELP_TOPICS" :current="topic.slug">
-    <HelpSection :title="topic.title">
+    <HelpSection>
       <HelpTopic :paragraphs="[topic.description]"/>
     </HelpSection>
   </HelpPage>

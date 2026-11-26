@@ -47,6 +47,7 @@ expect(help.includes('href="/hilfe/drucken"') && help.includes('So kommt das Erg
 const topic = read('pages/hilfe/anlegen/index.html')
 expect(topic.includes('href="https://probe.emberbox.app/hilfe/anlegen"'), 'help topic has no canonical')
 expect(topic.includes('"BreadcrumbList"'), 'help topic has no breadcrumb data')
+expect(!topic.includes('<h2'), 'help topic repeats its title as a section heading')
 expect(topic.includes('aria-current="page"') && topic.includes('Weiter: Drucken'), 'help topic has no topic navigation')
 expect(read('sitemap.xml').includes('https://probe.emberbox.app/hilfe/drucken'), 'sitemap lacks the help topics')
 
