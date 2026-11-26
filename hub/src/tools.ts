@@ -1,5 +1,6 @@
 import alarmzettel from '@emberbox/ui/logos/alarmzettel.svg'
 import calltaker from '@emberbox/ui/logos/calltaker.svg'
+import planspiel from '@emberbox/ui/logos/planspiel.svg'
 import statussim from '@emberbox/ui/logos/statussim.svg'
 
 /** An offer the hub links to. */
@@ -66,5 +67,16 @@ export const TOOLS: Tool[] = [
         source: 'https://github.com/ember-tools/calltaker',
         license: 'AGPL-3.0',
         help: 'https://calltaker.emberbox.app/hilfe',
+    },
+    {
+        name: 'Planspielplatte',
+        url: 'https://planspiel.emberbox.app',
+        description: 'Planspiele auf der Lagekarte: Fahrzeuge und Trupps als taktische Zeichen, die Lage in Lageständen nach Uhrzeit, gemeinsam live bearbeitet.',
+        logo: planspiel,
+        audiences: ['Jugendfeuerwehr', 'Einsatzabteilung'],
+        category: 'EducationalApplication',
+        source: 'https://github.com/ember-tools/planspiel',
+        license: 'AGPL-3.0',
+        help: 'https://planspiel.emberbox.app/hilfe',
     },
 ]

@@ -20,7 +20,8 @@ const {details, state} = useLegalDetails()
       <h2 class="headline text-2xl">Überblick</h2>
       <p class="m-0">
         Diese Erklärung gilt für emberbox.app und die Werkzeuge Alarmzettel (alarmzettel.emberbox.app),
-        Status Sim (statussim.emberbox.app) und Calltaker (calltaker.emberbox.app). Keines davon verlangt eine
+        Status Sim (statussim.emberbox.app), Calltaker (calltaker.emberbox.app) und Planspielplatte
+        (planspiel.emberbox.app). Keines davon verlangt eine
         Anmeldung, zeigt Werbung oder setzt Analyse- oder Tracking-Dienste ein. Schriften, Symbole und
         Kartenkacheln kommen von unseren Servern; beim Aufruf wird nichts von einem fremden Dienst geladen.
       </p>
@@ -101,6 +102,27 @@ const {details, state} = useLegalDetails()
         holt der Server selbst und liefert sie aus; der Browser stellt dafür keine Verbindung zu OpenStreetMap
         her. Ob der Klingelton an ist, merkt sich der Browser. Rechtsgrundlage ist unser berechtigtes Interesse,
         die gewünschte Übung bereitzustellen (Art. 6 Abs. 1 lit. f DSGVO).
+      </p>
+    </section>
+
+    <section class="flex flex-col gap-2">
+      <h2 class="headline text-2xl">Planspielplatte</h2>
+      <p class="m-0">
+        Eine Platte entsteht im lokalen Speicher des Browsers. Was darin steht – Fahrzeuge, Funkrufnamen, Wachen,
+        Lagemeldungen –, bestimmen die Nutzenden selbst; Namen von Personen gehören nicht hinein. Dazu merkt sich der
+        Browser, ob Lagestände animiert gewechselt werden, und die zuletzt geöffneten geteilten Platten mit
+        Schlüssel, Titel und Zeitpunkt.
+      </p>
+      <p class="m-0">
+        Wer eine Platte teilt, legt sie auf dem Server ab. Zugang hat, wer den Link zum Bearbeiten oder den Link zum
+        Zusehen kennt; der zweite erlaubt nur das Ansehen. Eine geteilte Platte bleibt gespeichert, bis sie über den
+        Link zum Bearbeiten gelöscht wird. Weil die Links den Zugang enthalten, werden die Aufrufe der
+        Planspielplatte nicht in die Zugriffsprotokolle geschrieben. Rechtsgrundlage ist unser berechtigtes
+        Interesse, die gewünschte gemeinsame Bearbeitung bereitzustellen (Art. 6 Abs. 1 lit. f DSGVO).
+      </p>
+      <p class="m-0">
+        Kartenkacheln holt der Server selbst von OpenStreetMap und liefert sie aus; der Browser stellt dafür keine
+        Verbindung zu OpenStreetMap her. Der Server löscht eine Kachel, die 30 Tage lang niemand aufgerufen hat.
       </p>
     </section>
 
