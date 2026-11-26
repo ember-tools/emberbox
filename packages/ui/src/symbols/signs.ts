@@ -11,13 +11,15 @@
  * light background, as on paper: size marks, frames and wheels are black, so a page in dark mode
  * shows them on a light backdrop.
  *
- * Every sign is drawn on the 120 × 80 canvas of the library. Size marks, roofs and supplements are
- * placed relative to the form they belong to, so they fit every basic form; under a roof the size
- * marks sit inside the roof, since the canvas has no room above it.
+ * Every sign is drawn on the 120 × 80 canvas of the library, which widens only for writing around
+ * the sign (a time, a presumption, an identification, a strength, stars above a size mark, the line
+ * to a location); the sign itself keeps its place. Size marks, roofs and supplements are placed
+ * relative to the form they belong to, so they fit every basic form; under a roof the size marks sit
+ * inside the roof, since the canvas has no room above it.
  */
 
-import {ABILITIES, type Ability, type AbilityName, type AbilityPart} from './abilities'
-import {SIGN_FONT, canvas, element, group, label, renderSvg, type SvgElement} from './svg'
+import {ABILITIES, type Ability, type AbilityName} from './abilities'
+import {BLACK, BOX_STROKE, HAZARD_RED, MEASURE_BLUE, SIGN_FONT, SYMBOL_HEIGHT, SYMBOL_WIDTH, WHITE, asterisk, boxPart, canvas, element, group, label, renderSvg, round, starOffsets, type BoxPart, type SvgElement} from './svg'
 
 /** The basic forms of chapter 1, in its order. */
 export const BASIC_FORMS = [
@@ -86,6 +88,26 @@ export interface TacticalSignSpec {
     abilities?: readonly AbilityName[]
     /** A short designation in the upper left corner (field A), such as "ELW 1", as annex C shows it. */
     designation?: string
+    /** A second line under the writing, such as the name of a section ("Nord") or a task ("Evakuierung"). */
+    subtitle?: string
+    /** Writing in the lower right corner inside the form (field B), such as an origin ("DLRG", "AW"). */
+    fieldB?: string
+    /** Writing in the free fields X of 6.1, in the upper right and lower left corners, such as "TP" or "K". */
+    fieldX?: {upperRight?: string, lowerLeft?: string}
+    /** The administrative level of 5.7, from 1 (municipality) to 6 (European Union), as stars above the form. */
+    level?: 1 | 2 | 3 | 4 | 5 | 6
+    /** A strength of 5.3 below the form, such as "1/1/6/40/48"; the last number, the total, is underlined. */
+    strength?: string
+    /** A time of 5.6 to the left of the form, such as "040835jun23". */
+    time?: string
+    /** An identification of 6.2 to the right of the form, such as "2-1-3". */
+    identification?: string
+    /** A presumption (5.8.1.13, "?") or an acute situation (5.8.1.14, "!") written before the form. */
+    certainty?: 'presumed' | 'acute'
+    /** A figure of annex D.2 inside the form, such as the tray of a staging area. */
+    figure?: SignFigure
+    /** Draws the dashed line to the location of a command post (D.1.1) below the form. */
+    located?: boolean
     /** Writing inside the form, such as a function or a vehicle name. */
     text?: string
     /** Shows the organisation's short name, which chapter 2 asks for whenever colour is missing. */
@@ -104,10 +126,6 @@ export const ORGANISATION_COLOURS: Readonly<Record<SignOrganisation, Readonly<{f
     civil: {fill: '#BEBEBE', text: '#000000', abbreviation: 'ZIV'},
 }
 
-const BLACK = '#000000'
-const WHITE = '#FFFFFF'
-const HAZARD_RED = '#FA321E'
-const MEASURE_BLUE = '#3264FA'
 const STROKE = 3
 
 /** Where a form lies on the canvas and where its writing, bars and short name go. */
@@ -126,6 +144,12 @@ interface Layout {
     logisticsBar: string
     /** Where the short name sits; outside the form where the form has no room for it. */
     short: {x: number, y: number, inside: boolean}
+    /** The font size of writing inside the form where the form is too small for the usual size. */
+    textSize?: number
+    /** A filled cap in place of the command bar, where the form has no room for a bar (the tip of a person). */
+    commandCap?: string
+    /** The room for abilities and figures where it is narrower than the bounds, as in a diamond. */
+    room?: {left: number, right: number, top: number, bottom: number}
 }
 
 /** A layout with straight bars inset from the bounds and the short name in the lower right corner. */
@@ -146,7 +170,7 @@ const SHORT_BESIDE = {x: 104, y: 42, inside: false}
 const FORMS: Record<BasicForm, Layout> = {
     'formation': layout('M10 16 H110 V68 H10 Z', 10, 110, 16, 68, 86, 42),
     'person': layout('M60 16 L86 42 L60 68 L34 42 Z', 34, 86, 16, 68, 30, 42,
-        {commandBar: 'M48 28 H72', logisticsBar: 'M48 56 H72', short: SHORT_BESIDE}),
+        {commandCap: 'M60 16 L71 27 H49 Z', logisticsBar: 'M48 56 H72', short: SHORT_BESIDE, textSize: 13, room: {left: 46, right: 74, top: 26, bottom: 58}}),
     'land-vehicle': layout('M10 16 Q60 24 110 16 V60 H10 Z', 10, 110, 16, 60, 86, 40, {commandBar: 'M15 23 Q60 31 105 23'}),
     'aircraft': layout('M22 62 A38 38 0 0 1 98 62 Z', 22, 98, 24, 62, 56, 48,
         {commandBar: 'M40 34 H80', short: {x: 84, y: 56, inside: true}}),
@@ -218,26 +242,13 @@ function sizeMark(size: SignSize, above: number): SvgElement[] {
     }
 }
 
-const ABILITY_STROKE = 2.5
-
-/** One part of an ability, drawn in its 100 × 60 box; `width` is the stroke width in that box. */
-function abilityPart(part: AbilityPart, colour: string, width: number): SvgElement {
-    const stroke = {stroke: colour, 'stroke-width': round(width), 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}
-    if ('text' in part) {
-        return {tag: 'text', attributes: {x: part.x, y: part.y, fill: colour, 'font-size': part.size, ...SIGN_FONT,
-            'text-anchor': 'middle', 'dominant-baseline': 'central'}, text: part.text}
-    }
-    const fill = part.filled ? colour : 'none'
-    if ('circle' in part) return element('circle', {cx: part.circle[0], cy: part.circle[1], r: part.circle[2], fill, ...stroke})
-    return element('path', {d: part.d, fill, ...stroke, ...(part.width ? {'stroke-width': round(part.width * width / ABILITY_STROKE)} : {})})
-}
-
 /** The room inside a form that abilities may take, clear of the designation and the command and logistics bars. */
 function abilityRoom(spec: TacticalSignSpec, form: Layout): {left: number, top: number, width: number, height: number} {
     const supplements = spec.supplements ?? []
-    const top = form.top + (supplements.includes('command') ? 12 : 4) + (spec.designation ? 10 : 0)
-    const bottom = form.bottom - (supplements.includes('logistics') ? 12 : 4)
-    return {left: form.left + 6, top, width: form.right - form.left - 12, height: bottom - top}
+    const bounds = form.room ?? {left: form.left + 6, right: form.right - 6, top: form.top + 4, bottom: form.bottom - 4}
+    const top = (form.room ? bounds.top : bounds.top + (supplements.includes('command') ? 8 : 0)) + (spec.designation || spec.fieldX?.upperRight ? 10 : 0)
+    const bottom = supplements.includes('logistics') ? Math.min(bounds.bottom, form.bottom - 12) : bounds.bottom
+    return {left: bounds.left, top, width: bounds.right - bounds.left, height: bottom - top}
 }
 
 /**
@@ -254,10 +265,10 @@ function abilityMarks(spec: TacticalSignSpec, form: Layout, colour: string): Svg
     if (only?.stretch) {
         const sx = room.width / 100
         const sy = room.height / 60
-        const lines = only.parts.filter(part => !('circle' in part)).map(part => abilityPart(part, colour, ABILITY_STROKE / Math.min(sx, sy)))
+        const lines = only.parts.filter(part => !('circle' in part)).map(part => boxPart(part, colour, BOX_STROKE / Math.min(sx, sy)))
         const dots = only.parts.flatMap(part => 'circle' in part
             ? [element('circle', {cx: round(room.left + part.circle[0] * sx), cy: round(room.top + part.circle[1] * sy),
-                r: round(part.circle[2] * Math.min(sx, sy)), fill: part.filled ? colour : 'none', stroke: colour, 'stroke-width': ABILITY_STROKE})]
+                r: round(part.circle[2] * Math.min(sx, sy)), fill: part.filled ? colour : 'none', stroke: colour, 'stroke-width': BOX_STROKE})]
             : [])
         return [group(lines, {transform: `translate(${round(room.left)} ${round(room.top)}) scale(${round(sx)} ${round(sy)})`}), ...dots]
     }
@@ -266,13 +277,9 @@ function abilityMarks(spec: TacticalSignSpec, form: Layout, colour: string): Svg
         const scale = Math.min(room.width / 100, slot / 60)
         const x = room.left + (room.width - 100 * scale) / 2
         const y = room.top + slot * (names.length - 1 - index) + (slot - 60 * scale) / 2
-        const parts = ABILITIES[name].parts.map(part => abilityPart(part, colour, ABILITY_STROKE / scale))
+        const parts = ABILITIES[name].parts.map(part => boxPart(part, colour, BOX_STROKE / scale))
         return group(parts, {transform: `translate(${round(x)} ${round(y)}) scale(${round(scale)})`})
     })
-}
-
-function round(value: number): number {
-    return Math.round(value * 1000) / 1000
 }
 
 /** The designation in the upper left corner of a form (field A), below a command bar if there is one. */
@@ -296,7 +303,9 @@ const ROOF_HEIGHT = 11
 function supplement(kind: Supplement, form: Layout, colour: string): SvgElement[] {
     const y = form.textY
     switch (kind) {
-        case 'command': return [line(form.commandBar, BLACK, 5)]
+        case 'command': return form.commandCap
+            ? [element('path', {d: form.commandCap, fill: BLACK, stroke: BLACK, 'stroke-width': 2, 'stroke-linejoin': 'round'})]
+            : [line(form.commandBar, BLACK, 5)]
         case 'logistics': return [line(form.logisticsBar, BLACK, 5)]
         case 'special-function': return [line(`M52 ${form.top + 8} H68`, colour)]
         case 'uncrewed': return [line(`M50 ${y - 14} L60 ${y - 6} L70 ${y - 14}`, colour, 4)]
@@ -410,11 +419,144 @@ export function tacticalSignTree(spec: TacticalSignSpec): SvgElement {
     for (const kind of supplements) parts.push(...supplement(kind, form, colours.line))
     if (spec.size) parts.push(...sizeMark(spec.size, form.top))
     if (spec.abilities?.length) parts.push(...abilityMarks(spec, form, colours.text))
+    if (spec.figure) parts.push(figureMark(spec, spec.figure, form, colours.text))
     if (spec.designation) parts.push(designation(spec, spec.designation, form, colours.text))
-    if (spec.text) parts.push(label(spec.text, 60, form.textY, colours.text, form.textWidth))
+    const underBar = spec.form === 'place' && (spec.supplements ?? []).includes('command') ? 4 : 0
+    const textY = (spec.subtitle ? form.textY - 5 : form.textY) + underBar
+    if (spec.text) parts.push(label(spec.text, 60, textY, colours.text, form.textWidth, form.textSize))
+    if (spec.subtitle) parts.push(label(spec.subtitle, 60, textY + 13, colours.text, form.textWidth, 9))
+    parts.push(...cornerFields(spec, form, colours.text))
     const short = spec.abbreviation && spec.organisation ? ORGANISATION_COLOURS[spec.organisation].abbreviation : ''
     if (short) parts.push(label(short, form.short.x, form.short.y, form.short.inside ? colours.text : BLACK, 24, 10))
-    return canvas([group(parts)])
+    const margins = {left: 0, right: 0, top: 0, bottom: 0}
+    if (spec.level) {
+        const raised = spec.size !== undefined || (spec.supplements ?? []).includes('roof')
+        const y = raised ? form.top - (spec.level === 6 ? 26 : 20) : form.top - (spec.level === 6 ? 9 : 7)
+        parts.push(stars(spec.level, y))
+        const highest = y + Math.min(...starOffsets(spec.level).map(([, dy]) => dy)) - STAR_RADIUS(spec.level) - 1
+        margins.top = Math.max(0, Math.ceil(-highest))
+    }
+    const below = form.bottom + (spec.drive || spec.body ? 14 : 2)
+    if (spec.located) {
+        parts.push(...locationLine(form))
+        margins.bottom = form.bottom + 36 - SYMBOL_HEIGHT
+    }
+    if (spec.strength) {
+        const y = spec.located ? form.bottom + 44 : below + 8
+        parts.push(...strengthMark(spec.strength, y))
+        margins.bottom = Math.max(margins.bottom, y + 6 - SYMBOL_HEIGHT)
+    }
+    const ink = spec.style === 'mono' ? BLACK : HAZARD_RED
+    let left = form.left - 6
+    if (spec.certainty) {
+        parts.push(corner(spec.certainty === 'presumed' ? '?' : '!', left, form.textY, ink, 'end', 28))
+        left -= writingWidth('?', 28) + 4
+    }
+    if (spec.time) {
+        parts.push(beside(spec.time, left, form.textY, 'end'))
+        left -= writingWidth(spec.time, BESIDE_SIZE)
+    }
+    margins.left = Math.max(0, Math.ceil(2 - left))
+    if (spec.identification) {
+        const start = short && !form.short.inside ? form.short.x + writingWidth(short, 10) / 2 + 4 : form.right + 6
+        parts.push(beside(spec.identification, start, form.textY, 'start'))
+        margins.right = Math.max(0, Math.ceil(start + writingWidth(spec.identification, BESIDE_SIZE) + 2 - SYMBOL_WIDTH))
+    }
+    return canvas([group(parts)], margins)
+}
+
+/**
+ * Field B in the lower right and the fields X of 6.1 in the upper right and lower left corners:
+ * inside the form where it has room, otherwise just outside, beside its edges.
+ */
+function cornerFields(spec: TacticalSignSpec, form: Layout, colour: string): SvgElement[] {
+    const below = (spec.supplements ?? []).includes('command') && !form.commandCap ? 12 : 0
+    const inside = form.short.inside
+    const low = form.bottom - 6 - ((spec.supplements ?? []).includes('logistics') ? 8 : 0)
+    const fields: SvgElement[] = []
+    if (spec.fieldB) {
+        fields.push(inside ? corner(spec.fieldB, form.right - 4, low, colour, 'end') : corner(spec.fieldB, 66, form.bottom - 2, BLACK, 'start', 8))
+    }
+    if (spec.fieldX?.upperRight) {
+        fields.push(inside
+            ? corner(spec.fieldX.upperRight, form.right - 4, form.top + 8 + below, colour, 'end')
+            : corner(spec.fieldX.upperRight, 66, form.top + 2, BLACK, 'start', 8))
+    }
+    if (spec.fieldX?.lowerLeft) {
+        fields.push(inside
+            ? corner(spec.fieldX.lowerLeft, form.left + 5, low, colour, 'start')
+            : corner(spec.fieldX.lowerLeft, 54, form.bottom - 2, BLACK, 'end', 8))
+    }
+    return fields
+}
+
+const BESIDE_SIZE = 12
+
+/** Writing beside a sign, squeezed to its estimated width so the canvas margin always holds it, whatever font a map falls back to. */
+function beside(text: string, x: number, y: number, anchor: 'start' | 'end'): SvgElement {
+    const writing = corner(text, x, y, BLACK, anchor, BESIDE_SIZE)
+    return {...writing, attributes: {...writing.attributes, textLength: writingWidth(text, BESIDE_SIZE), lengthAdjust: 'spacingAndGlyphs'}}
+}
+
+/** Roughly how wide a line of writing is in the sign font, to make room for it beside the sign. */
+function writingWidth(text: string, size: number): number {
+    return Math.ceil(text.length * size * 0.55)
+}
+
+/** Writing anchored at its start or end, for corners and the writing beside a sign. */
+function corner(text: string, x: number, y: number, colour: string, anchor: 'start' | 'end', size = 9): SvgElement {
+    return {tag: 'text', attributes: {x, y, fill: colour, 'font-size': size, ...SIGN_FONT, 'text-anchor': anchor, 'dominant-baseline': 'central'}, text}
+}
+
+/** The size of the stars above a form; the ring of the European Union has smaller ones. */
+const STAR_RADIUS = (level: number) => level === 6 ? 3 : 4
+
+/** The stars of an administrative level (5.7) above a form; the European Union gets its ring of stars. */
+function stars(level: number, y: number): SvgElement {
+    return element('path', {d: starOffsets(level).map(([dx, dy]) => asterisk(60 + dx, y + dy, STAR_RADIUS(level))).join(' '), fill: 'none', stroke: BLACK,
+        'stroke-width': 1.5, 'stroke-linecap': 'round'})
+}
+
+/** The figures of annex D.2 drawn inside a place, on the 100 × 60 box of the abilities. */
+export const SIGN_FIGURES = {
+    'staging-area': [{d: 'M18 18 Q50 30 82 18 V50 H18 Z'}],
+    'staging-area-with-report': [{d: 'M22 30 Q50 40 78 30 V58 H22 Z'}, {text: 'M', x: 50, y: 12, size: 24}],
+    'landing-zone': [{d: 'M24 18 L50 30 L24 42 Z M76 18 L50 30 L76 42 Z', filled: true}, {d: 'M14 30 H86'}],
+} as const satisfies Record<string, readonly BoxPart[]>
+
+/** A figure of annex D.2. */
+export type SignFigure = keyof typeof SIGN_FIGURES
+
+/** A figure inside a form, scaled evenly into the room the abilities would take. */
+function figureMark(spec: TacticalSignSpec, figure: SignFigure, form: Layout, colour: string): SvgElement {
+    const room = abilityRoom(spec, form)
+    const scale = Math.min(room.width / 100, room.height / 60)
+    const x = room.left + (room.width - 100 * scale) / 2
+    const y = room.top + (room.height - 60 * scale) / 2
+    return group(SIGN_FIGURES[figure].map(part => boxPart(part, colour, BOX_STROKE / scale)),
+        {transform: `translate(${round(x)} ${round(y)}) scale(${round(scale)})`})
+}
+
+/** The dashed line from a command post to its location on the map, ending in a cross (D.1.1). */
+function locationLine(form: Layout): SvgElement[] {
+    const end = {x: form.left + 76, y: form.bottom + 30}
+    return [
+        element('path', {d: `M${form.left} ${form.bottom} L${end.x} ${end.y}`, stroke: BLACK, 'stroke-width': 1.5, 'stroke-dasharray': '4 3', fill: 'none'}),
+        element('path', {d: `M${end.x - 4} ${end.y - 4} L${end.x + 4} ${end.y + 4} M${end.x + 4} ${end.y - 4} L${end.x - 4} ${end.y + 4}`,
+            stroke: BLACK, 'stroke-width': 1.5}),
+    ]
+}
+
+/** A strength of 5.3 below the form, its last number, the total, underlined. */
+function strengthMark(strength: string, y: number): SvgElement[] {
+    const parts = strength.split('/')
+    const total = parts.pop() ?? ''
+    const head = parts.length ? `${parts.join('/')}/` : ''
+    return [{tag: 'text', attributes: {x: 60, y, fill: BLACK, 'font-size': 11, ...SIGN_FONT, 'text-anchor': 'middle', 'dominant-baseline': 'central'},
+        children: [
+            {tag: 'tspan', attributes: {}, text: head},
+            {tag: 'tspan', attributes: {'text-decoration': 'underline'}, text: total},
+        ]}]
 }
 
 /** The sign as SVG markup, for map icons. */

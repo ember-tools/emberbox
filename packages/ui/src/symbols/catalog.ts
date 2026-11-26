@@ -1,4 +1,5 @@
 import {ABILITIES, type AbilityName} from './abilities'
+import {ADDITIONAL_SIGNS, additionalSignTree, type AdditionalSignName} from './additional'
 import {tacticalSignTree, type TacticalSignSpec} from './signs'
 import type {SvgElement} from './svg'
 import {markSymbolTree, type MarkKind} from './tactical'
@@ -19,7 +20,7 @@ export interface CatalogEntry {
     name: string
     page?: number
     recommended: boolean
-    drawing: {sign: TacticalSignSpec} | {mark: MarkKind}
+    drawing: {sign: TacticalSignSpec} | {additional: AdditionalSignName} | {mark: MarkKind}
 }
 
 /** The source the catalogue follows, to be named wherever its signs are shown. */
@@ -30,23 +31,37 @@ function entry(number: string, name: string, page: number, sign: TacticalSignSpe
     return {id, number, name, page, recommended: true, drawing: {sign}}
 }
 
+/** The additional signs of chapter 5 whose number starts with `section`, as catalogue entries. */
+function additionalEntries(section: string): CatalogEntry[] {
+    return Object.entries(ADDITIONAL_SIGNS)
+        .filter(([, sign]) => sign.number.startsWith(`${section}.`))
+        .map(([name, sign]) => ({id: sign.number, number: sign.number, name: sign.name, page: sign.page, recommended: true,
+            drawing: {additional: name as AdditionalSignName}}))
+}
+
 function ownMark(number: string, name: string, mark: MarkKind): CatalogEntry {
     return {id: number, number, name, recommended: false, drawing: {mark}}
 }
 
 /** The drawing of a catalogue entry as a tree of SVG elements. */
 export function catalogSignTree(entry: CatalogEntry): SvgElement {
-    return 'sign' in entry.drawing ? tacticalSignTree(entry.drawing.sign) : markSymbolTree(entry.drawing.mark)
+    if ('sign' in entry.drawing) return tacticalSignTree(entry.drawing.sign)
+    if ('additional' in entry.drawing) return additionalSignTree(entry.drawing.additional)
+    return markSymbolTree(entry.drawing.mark)
 }
 
 const FIRE = {organisation: 'fire'} as const
+const COMMAND = {organisation: 'command', supplements: ['command']} as const
+const LEADER = {form: 'person', supplements: ['command']} as const
 
 /**
- * The signs of chapters 1 to 4, 5.1, 5.4, 5.5 and annex C of the recommendations, in their order,
- * then the library's own water supply marks. Chapter 1 is drawn black on white as printed, chapter 4
- * on a plain formation; colours are shown on a tactical formation, supplements, vehicles and sizes
- * in fire service red. Letters that annex C writes inside a symbol ("P", "G", "ATF") stand in field A
- * here, and the flying line of C.1.13 sits under the form as in 5.1.4.
+ * The signs of chapters 1 to 6 and annexes C and D of the recommendations, in their order, then the
+ * library's own water supply marks. Where a chapter explains a way of writing rather than a sign
+ * (5.3, 5.6, 5.8.1.13 before a sign, 6.1, 6.2), its example stands for it. Chapter 1 is drawn black
+ * on white as printed, chapter 4 on a plain formation; colours are shown on a tactical formation,
+ * supplements, vehicles and sizes in fire service red. Letters that annex C writes inside a symbol
+ * ("P", "G", "ATF") stand in field A here, and the flying line of C.1.13 sits under the form as in
+ * 5.1.4.
  */
 export const TACTICAL_SIGN_CATALOG: readonly CatalogEntry[] = [
     entry('1.1', 'Taktische Formation', 14, {form: 'formation'}),
@@ -102,6 +117,9 @@ export const TACTICAL_SIGN_CATALOG: readonly CatalogEntry[] = [
     entry('5.1.4.1', 'Einsatz von Luftfahrzeugen/Fliegen allgemein', 34, {form: 'aircraft', ...FIRE, flight: 'flying'}),
     entry('5.1.4.2', 'Drehflügler/Hubschrauber', 34, {form: 'aircraft', ...FIRE, flight: 'rotary-wing'}),
     entry('5.1.4.3', 'Flächenflügler/Flugzeug', 34, {form: 'aircraft', ...FIRE, flight: 'fixed-wing'}),
+    ...additionalEntries('5.2'),
+    entry('5.3', 'Stärkeangabe, z. B. 1/1/6/40/48 (Gesamtstärke unterstrichen)', 35,
+        {form: 'formation', ...FIRE, size: 'association-1', strength: '1/1/6/40/48'}),
     entry('5.4.1', 'Trupp/selbstständiger Trupp', 37, {form: 'formation', ...FIRE, size: 'squad'}),
     entry('5.4.2', 'Staffel', 37, {form: 'formation', ...FIRE, size: 'section'}),
     entry('5.4.3', 'Gruppe', 37, {form: 'formation', ...FIRE, size: 'group'}),
@@ -109,6 +127,14 @@ export const TACTICAL_SIGN_CATALOG: readonly CatalogEntry[] = [
     entry('5.5.1', 'Bereitschaft (Verband I)', 37, {form: 'formation', ...FIRE, size: 'association-1'}),
     entry('5.5.2', 'Abteilung (Verband II)', 37, {form: 'formation', ...FIRE, size: 'association-2'}),
     entry('5.5.3', 'Großverband (Verband III)', 37, {form: 'formation', ...FIRE, size: 'association-3'}),
+    entry('5.6', 'Taktische Zeitangabe, z. B. 040835jun23 = 4. Juni 2023, 08:35 Uhr', 38,
+        {form: 'formation', ...FIRE, size: 'group', time: '040835jun23'}),
+    ...additionalEntries('5.7'),
+    ...additionalEntries('5.8'),
+    entry('5.8.1.13', 'Hinweis auf Vermutung, dem Taktischen Zeichen vorangestellt', 42, {form: 'person', certainty: 'presumed'}, '5.8.1.13-before-sign'),
+    entry('6.1', 'Ergänzende Angaben in den Feldern A und B, z. B. Strömungsretter der DLRG', 50,
+        {form: 'formation', organisation: 'aid', designation: 'Strömungsretter', abilities: ['water-rescue'], fieldB: 'DLRG'}),
+    entry('6.2', 'Identifizierung Taktischer Formationen, z. B. 2-1-3', 52, {form: 'formation', ...FIRE, size: 'group', identification: '2-1-3'}),
     entry('C.1.1', 'Löschstaffel (Staffellöschfahrzeug)', 71, {form: 'formation', ...FIRE, size: 'section', abilities: ['firefighting']}),
     entry('C.1.2', 'Löschgruppe (Löschgruppenfahrzeug)', 71, {form: 'formation', ...FIRE, size: 'group', abilities: ['firefighting']}),
     entry('C.1.3', 'Löschzug einer Feuerwehr', 71, {form: 'formation', ...FIRE, size: 'platoon', abilities: ['firefighting']}),
@@ -155,6 +181,52 @@ export const TACTICAL_SIGN_CATALOG: readonly CatalogEntry[] = [
     entry('C.2.29', 'Tragkraftspritzenanhänger', 76, {form: 'land-vehicle', ...FIRE, body: 'trailer', drive: 'towed-by-car', abilities: ['firefighting']}),
     entry('C.2.30', 'Feuerwehr Netzersatzanlage 120 kVA', 76, {form: 'land-vehicle', ...FIRE, body: 'trailer', drive: 'towed-by-car', supplements: ['logistics'], abilities: ['power'], designation: '120'}),
     entry('C.2.31', 'Geschützte Löschdrohne/Löschroboter auf Kettenfahrgestell', 76, {form: 'land-vehicle', ...FIRE, protected: true, drive: 'tracked', supplements: ['uncrewed'], abilities: ['firefighting']}),
+    entry('D.1.1', 'Befehlsstelle, Führungsstelle (aktiv im Einsatz), mit Linie zum Standort', 76,
+        {form: 'formation', ...COMMAND, designation: 'Bezeichnung', located: true}),
+    entry('D.1.2', 'Katastrophenschutzleitung im Einsatz', 76, {form: 'formation', ...COMMAND, text: 'KatSL'}),
+    entry('D.1.3', 'Technische Einsatzleitung „Evakuierung“ im Einsatz', 76, {form: 'formation', ...COMMAND, text: 'TEL', subtitle: 'Evakuierung'}),
+    entry('D.1.4', 'Einsatzleitung im Einsatz', 76, {form: 'formation', ...COMMAND, text: 'EL'}),
+    entry('D.1.5', 'Einsatzabschnittsleitung „Nord“ im Einsatz', 77, {form: 'formation', ...COMMAND, text: 'EAL', subtitle: 'Nord'}),
+    entry('D.1.6', 'Untereinsatzabschnittsleitung im Einsatz', 77, {form: 'formation', ...COMMAND, text: 'UEAL'}),
+    entry('D.1.7', 'Führungsgruppe TEL i. S. einer Stabsstelle', 77, {form: 'formation', ...COMMAND, size: 'group', text: 'TEL'}),
+    entry('D.1.8', 'Führungsgruppe einer Feuerwehrbereitschaft', 77, {form: 'formation', ...FIRE, supplements: ['command'], size: 'group', text: 'Ber'}),
+    entry('D.1.9', 'Zugtrupp einer Sanitätseinheit', 77, {form: 'formation', organisation: 'aid', supplements: ['command'], size: 'squad', abilities: ['medical']}),
+    entry('D.2.1', 'Bereitstellungsraum', 77, {form: 'place', organisation: 'command', figure: 'staging-area'}),
+    entry('D.2.2', 'Bereitstellungsraum mit Meldekopf', 77, {form: 'place', organisation: 'command', figure: 'staging-area-with-report'}),
+    entry('D.2.3', 'Meldekopf', 77, {form: 'place', organisation: 'command', text: 'M'}),
+    entry('D.2.4', 'Lotsenstelle/Abholpunkt', 77, {form: 'place', organisation: 'command', text: 'L'}),
+    entry('D.2.5', 'Leitstelle', 78, {form: 'place', organisation: 'command', supplements: ['roof', 'command'], text: 'LtS'}),
+    entry('D.2.6', 'Hubschrauberlandezone/Übergabepunkt Luft-Boden', 78, {form: 'place', organisation: 'command', figure: 'landing-zone'}),
+    entry('D.2.7', 'Hubschrauberlandeplatz, gesicherte Infrastruktur/für Notfälle vorbereitet (auch temporär)', 78,
+        {form: 'place', organisation: 'command', supplements: ['roof'], figure: 'landing-zone'}),
+    entry('D.3.1', 'Leiter der Technischen Einsatzleitung des Landkreises Ahrweiler', 78,
+        {...LEADER, organisation: 'command', level: 2, text: 'TEL', fieldB: 'AW'}),
+    entry('D.3.2', 'Einsatzleiter', 78, {...LEADER, organisation: 'command', text: 'EL'}),
+    entry('D.3.3', 'Leitender Notarzt', 78, {...LEADER, organisation: 'command', level: 2, text: 'LNA'}),
+    entry('D.3.4', 'Organisatorischer Leiter', 78, {...LEADER, organisation: 'command', level: 2, text: 'OrgL'}),
+    entry('D.3.5', 'Einsatzabschnittsleiter', 78, {...LEADER, organisation: 'command', text: 'EAL'}),
+    entry('D.3.6', 'Untereinsatzabschnittsleiter', 78, {...LEADER, organisation: 'command', text: 'UEAL'}),
+    entry('D.3.7', 'Zugführer eines Löschzuges der Feuerwehr', 78, {...LEADER, ...FIRE, size: 'platoon', abilities: ['firefighting']}),
+    entry('D.3.8', 'Zugführer eines Technischen Zuges des THW', 79, {...LEADER, organisation: 'thw', size: 'platoon', text: 'TZ'}),
+    entry('D.3.9', 'Zugführer eines Sanitätszuges des Arbeiter-Samariter-Bundes', 79,
+        {...LEADER, organisation: 'aid', size: 'platoon', abilities: ['medical'], fieldB: 'ASB'}),
+    entry('D.3.10', 'Zugführer einer Einsatzeinheit des Deutschen Roten Kreuzes', 79,
+        {...LEADER, organisation: 'aid', size: 'platoon', abilities: ['care', 'medical'], fieldB: 'DRK'}),
+    entry('D.3.11', 'Zugführer eines Betreuungszuges des Arbeiter-Samariter-Bundes', 79,
+        {...LEADER, organisation: 'aid', size: 'platoon', abilities: ['care'], fieldB: 'ASB'}),
+    entry('D.3.12', 'Gruppenführer einer Betreuungsgruppe des Malteser Hilfsdienstes', 79,
+        {...LEADER, organisation: 'aid', size: 'group', abilities: ['care'], fieldB: 'MHD'}),
+    entry('D.3.13', 'Gruppenführer einer Schnell-Einsatz-Gruppe der Johanniter-Unfall-Hilfe', 79,
+        {...LEADER, organisation: 'aid', size: 'group', text: 'SEG', fieldB: 'JUH'}),
+    entry('D.3.14', 'Fachberater des THW, in Hauptfunktion stellvertretender Ortsbeauftragter', 79,
+        {form: 'person', organisation: 'thw', supplements: ['special-function'], text: 'THW', fieldB: 'stv OB'}),
+    entry('D.3.15', 'Rotkreuzbeauftragter', 79, {form: 'person', organisation: 'aid', supplements: ['special-function'], text: 'RKB', fieldB: 'DRK'}),
+    entry('D.4.1', 'Leiter der Kreisleitstelle des Kreises Steinfurt', 80, {...LEADER, organisation: 'command', level: 2, text: 'LtS', fieldB: 'ST'}),
+    entry('D.4.2', 'Kreisbrandmeister des Kreises Mettmann', 80, {...LEADER, ...FIRE, level: 2, text: 'KBM', fieldB: 'ME'}),
+    entry('D.4.3', 'Leiter der Gefahrenabwehr in der kreisfreien Stadt Mönchengladbach', 80,
+        {...LEADER, organisation: 'command', level: 2, text: 'LtrGA', fieldB: 'MG'}),
+    entry('D.4.4', 'Leiter der Gefahrenabwehrkräfte der Bundespolizei', 80, {...LEADER, organisation: 'police', level: 5, fieldB: 'BuPol'}),
+    entry('D.4.5', 'Leiter (Koordinator) einer internationalen Hilfsaktion', 80, {...LEADER, organisation: 'command', level: 6}),
     ownMark('W.1', 'Unterflurhydrant', 'hydrant-underground'),
     ownMark('W.2', 'Überflurhydrant', 'hydrant-pillar'),
     ownMark('W.3', 'Offenes Gewässer', 'open-water'),

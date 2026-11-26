@@ -18,7 +18,7 @@ const styles: {value: SignStyle, label: string}[] = [
   {value: 'mono', label: 'Schwarz-Weiß'},
 ]
 
-/** An entry drawn in the chosen style; marks of the library have only one look. */
+/** An entry drawn in the chosen style; the additional signs and the library's own marks have only one look. */
 function drawing(entry: CatalogEntry) {
   return 'sign' in entry.drawing ? tacticalSignTree({...entry.drawing.sign, style: style.value}) : catalogSignTree(entry)
 }
