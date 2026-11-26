@@ -3,6 +3,7 @@ WORKDIR /build
 COPY package.json package-lock.json ./
 COPY packages/ui/package.json packages/ui/
 COPY hub/package.json hub/
+COPY packages/lint packages/lint
 RUN npm ci --no-audit --no-fund
 COPY packages/ui packages/ui
 COPY hub hub

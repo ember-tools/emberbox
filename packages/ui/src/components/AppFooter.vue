@@ -19,6 +19,7 @@ const props = withDefaults(defineProps<{
   notice?: string
   backlink?: boolean
 }>(), {
+  help: undefined,
   notice: 'Kein offizielles Angebot einer Feuerwehr oder Leitstelle.',
   backlink: true,
 })
@@ -42,7 +43,7 @@ const links = [
       <div class="flex flex-col items-center gap-1 text-center">
         <ULink v-if="backlink" :to="HUB_URL"
                class="mb-1 flex items-center gap-2 text-sm text-default hover:text-highlighted hover:underline">
-          <img :src="emberboxLogo" alt="" width="20" height="20" class="size-5 rounded-[3px]">
+          <img :src="emberboxLogo" alt="" width="20" height="20" class="size-5 rounded-[3px]" />
           <span>Ein Werkzeug der <strong class="font-semibold">Emberbox</strong></span>
         </ULink>
         <p class="m-0 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">

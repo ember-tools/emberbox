@@ -14,6 +14,8 @@ const {
   noValue = 'nein',
   yesLabel = 'Ja',
   noLabel = 'Nein',
+  yesTitle = undefined,
+  noTitle = undefined,
 } = defineProps<{
   label: string
   yesValue?: string

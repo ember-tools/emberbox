@@ -13,7 +13,7 @@ defineProps<{ tool: Tool, featured?: boolean }>()
   <article
       class="group relative flex gap-4 rounded-sm border border-default bg-default p-5 transition-colors hover:border-accented"
       :class="featured ? 'flex-col sm:flex-row sm:items-center' : 'flex-col'">
-    <img :src="tool.logo" alt="" width="56" height="56" class="size-14 shrink-0 rounded-sm">
+    <img :src="tool.logo" alt="" width="56" height="56" class="size-14 shrink-0 rounded-sm" />
     <div class="flex grow flex-col gap-2">
       <h3 class="headline m-0 text-2xl text-highlighted">
         <a :href="tool.url" class="flex items-center gap-2 after:absolute after:inset-0 after:content-['']">
