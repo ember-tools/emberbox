@@ -136,7 +136,7 @@ describe('catalogue', () => {
         const ids = TACTICAL_SIGN_CATALOG.map(entry => entry.id)
         expect(new Set(ids).size).toBe(ids.length)
         for (const entry of TACTICAL_SIGN_CATALOG) {
-            expect(entry.number, entry.id).toMatch(entry.recommended ? /^([1-6]|C|D)(\.\d+)+$/ : /^W\.\d+$/)
+            expect(entry.number, entry.id).toMatch(entry.recommended ? /^([1-6]|C|D)(\.\d+)+$/ : /^[GW]\.\d+$/)
             expect(entry.page !== undefined, entry.id).toBe(entry.recommended)
         }
     })
@@ -164,6 +164,20 @@ describe('catalogue', () => {
             ...Array.from({length: 5}, (_, n) => `D.4.${n + 1}`),
         ]
         for (const number of expected) expect(numbers.has(number), number).toBe(true)
+    })
+
+    it('builds the group of a fire service from the building blocks', () => {
+        const group = TACTICAL_SIGN_CATALOG.filter(entry => entry.number.startsWith('G.'))
+        expect(group.map(entry => 'sign' in entry.drawing && entry.drawing.sign.text))
+            .toEqual(['GF', 'StF', 'ZF', 'TrF', 'Ma', 'Me', 'A-Tr', 'W-Tr', 'S-Tr', 'Si-Tr'])
+        expect(group.map(entry => 'sign' in entry.drawing && entry.drawing.sign.size))
+            .toEqual(['group', 'section', 'platoon', 'squad', undefined, undefined, 'squad', 'squad', 'squad', 'squad'])
+        for (const entry of group) {
+            const sign = 'sign' in entry.drawing ? entry.drawing.sign : undefined
+            expect(sign?.organisation, entry.id).toBe('fire')
+            expect(sign?.form, entry.id).toBe(Number(entry.number.slice(2)) <= 6 ? 'person' : 'formation')
+            expect(sign?.supplements?.includes('command') ?? false, entry.id).toBe(['G.1', 'G.2', 'G.3'].includes(entry.id))
+        }
     })
 
     it('keeps the drawing of every entry', () => {
