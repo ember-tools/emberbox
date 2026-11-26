@@ -116,7 +116,8 @@ const {details, state} = useLegalDetails()
       <p class="m-0">
         Wer eine Platte teilt, legt sie auf dem Server ab. Zugang hat, wer den Link zum Bearbeiten oder den Link zum
         Zusehen kennt; der zweite erlaubt nur das Ansehen. Eine geteilte Platte bleibt gespeichert, bis sie über den
-        Link zum Bearbeiten gelöscht wird. Weil die Links den Zugang enthalten, werden die Aufrufe der
+        Link zum Bearbeiten gelöscht wird; wer diesen Link verloren hat, kann die Löschung über die oben genannte
+        Adresse verlangen. Weil die Links den Zugang enthalten, werden die Aufrufe der
         Planspielplatte nicht in die Zugriffsprotokolle geschrieben. Rechtsgrundlage ist unser berechtigtes
         Interesse, die gewünschte gemeinsame Bearbeitung bereitzustellen (Art. 6 Abs. 1 lit. f DSGVO).
       </p>
