@@ -21,7 +21,8 @@ const {details, state} = useLegalDetails()
       <p class="m-0">
         Diese Erklärung gilt für emberbox.app und die Werkzeuge Alarmzettel (alarmzettel.emberbox.app),
         Status Sim (statussim.emberbox.app), Calltaker (calltaker.emberbox.app), Planspielplatte
-        (planspiel.emberbox.app) und Förderstrecke (foerderstrecke.emberbox.app). Keines davon verlangt eine
+        (planspiel.emberbox.app), Förderstrecke (foerderstrecke.emberbox.app) und Lernkarten
+        (lernkarten.emberbox.app). Keines davon verlangt eine
         Anmeldung, zeigt Werbung oder setzt Analyse- oder Tracking-Dienste ein. Schriften, Symbole und
         Kartenkacheln kommen von unseren Servern; beim Aufruf wird nichts von einem fremden Dienst geladen.
       </p>
@@ -160,6 +161,21 @@ const {details, state} = useLegalDetails()
       <p class="m-0">
         Kartenkacheln holt der Server selbst von OpenStreetMap und liefert sie aus; der Browser stellt dafür keine
         Verbindung zu OpenStreetMap her. Der Server löscht eine Kachel, die 30 Tage lang niemand aufgerufen hat.
+      </p>
+    </section>
+
+    <section class="flex flex-col gap-2">
+      <h2 class="headline text-2xl">Lernkarten</h2>
+      <p class="m-0">
+        Der Lernstand bleibt im lokalen Speicher des Browsers: für jede beantwortete Karte das Fach, wann sie wieder
+        fällig ist, wie oft sie kam und ob die letzte Antwort stimmte, dazu die gewählte Zahl der Quizfragen. Er
+        bleibt dort, bis die Nutzenden ihn zurücksetzen oder die Daten des Browsers löschen. Als Datei verlässt er
+        den Browser nur, wenn die Nutzenden ihn selbst speichern.
+      </p>
+      <p class="m-0">
+        Der Server liefert nur die Seiten aus und speichert nichts; die Aufrufe der Lernkarten werden nicht in die
+        Zugriffsprotokolle geschrieben. Die Liste der UN-Nummern für die Suche liefert ebenfalls unser Server; kein
+        fremder Dienst wird angefragt.
       </p>
     </section>
 
