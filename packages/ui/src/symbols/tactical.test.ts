@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {MARK_KINDS, escapeSvg, markSymbol, renderSvg, unitSymbol} from './tactical'
+import {MARK_KINDS, escapeSvg, markSymbol, renderSvg, unitSymbol, unitSymbolTree, type UnitSize} from './tactical'
 
 describe('escapeSvg', () => {
     it('escapes everything that could leave a text node or an attribute', () => {
@@ -14,11 +14,28 @@ describe('unitSymbol', () => {
         expect(svg).toContain('&#60;img')
     })
 
-    it('draws one dot for a squad and three for a group', () => {
-        const dots = (size: 'squad' | 'group') =>
-            unitSymbol({shape: 'unit', organisation: 'fire', text: 'A', size}).match(/<circle/g)?.length
-        expect(dots('squad')).toBe(1)
-        expect(dots('group')).toBe(3)
+    it('marks the sizes as the recommendations do: one dot, two stacked, two apart, three', () => {
+        const dots = (size: UnitSize) => unitSymbolTree({shape: 'unit', organisation: 'fire', text: 'A', size}).children!
+            .filter(child => child.tag === 'circle').map(child => [child.attributes.cx, child.attributes.cy])
+        expect(dots('squad')).toEqual([[60, 6]])
+        expect(dots('section')).toEqual([[60, 3], [60, 10]])
+        expect(dots('group')).toEqual([[52, 6], [68, 6]])
+        expect(dots('platoon')).toEqual([[50, 6], [60, 6], [70, 6]])
+    })
+
+    it('draws a squad as a compact rounded form below its size mark', () => {
+        const tree = unitSymbolTree({shape: 'squad', organisation: 'fire', text: 'AT', size: 'squad'})
+        const body = tree.children!.find(child => child.tag === 'rect')!
+        expect(body.attributes).toMatchObject({x: 24, y: 18, width: 72, rx: 14})
+        const lowestDot = Math.max(...tree.children!.filter(child => child.tag === 'circle')
+            .map(child => Number(child.attributes.cy) + Number(child.attributes.r)))
+        expect(Number(body.attributes.y) - 1.5).toBeGreaterThan(lowestDot)
+    })
+
+    it('squeezes long writing into the squad form', () => {
+        const tree = unitSymbolTree({shape: 'squad', organisation: 'fire', text: 'command-support'})
+        const text = tree.children!.find(child => child.tag === 'text')!
+        expect(Number(text.attributes.textLength)).toBeLessThanOrEqual(69)
     })
 
     it('draws medical units red on white', () => {

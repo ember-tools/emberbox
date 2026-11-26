@@ -93,11 +93,11 @@ time as two strings in German notation) and `CollapsibleSection`, which remember
 open. Besides their own props the fields pass `class`, `hint`, `help`, `error` and
 `required` on to the `UFormField` around them; all of them take `disabled`. The pattern page shows all of them.
 
-Tactical symbols: `unitSymbolTree` draws a vehicle, container, trailer, boat or squad with its
-writing and size mark, `markSymbolTree` a place of an incident (`INCIDENT_MARK_KINDS`) or a point of
-the water supply (`WATER_SUPPLY_MARK_KINDS`). `TacticalSymbol` shows such a tree in the page
-(`symbol` prop), so the theme's signal red applies; `unitSymbol` and `markSymbol` give the same
-symbols as SVG strings for map icons.
+Tactical symbols: `unitSymbolTree` draws a vehicle, container, trailer, boat, unit or dismounted
+squad with its writing and size mark (Trupp, Staffel, Gruppe, Zug), `markSymbolTree` a place of an
+incident (`INCIDENT_MARK_KINDS`) or a point of the water supply (`WATER_SUPPLY_MARK_KINDS`).
+`TacticalSymbol` shows such a tree in the page (`symbol` prop), so the theme's signal red applies;
+`unitSymbol` and `markSymbol` give the same symbols as SVG strings for map icons.
 
 ## Logo, app, SEO and prerendering
 
