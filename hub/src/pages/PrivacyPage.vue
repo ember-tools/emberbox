@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {usePage} from '@emberbox/ui'
 import ProviderDetails from '../components/ProviderDetails.vue'
-import {HOSTER, STATUSSIM_RETENTION, useLegalDetails} from '../legal'
+import {HOSTER, useLegalDetails} from '../legal'
 
 usePage({
   title: 'Datenschutz – Emberbox',
@@ -87,8 +87,9 @@ const {details, state} = useLegalDetails()
       <p class="m-0">
         Eine Übung speichert auf dem Server die Namen der Leitstelle und der Fahrzeuge, die Statusmeldungen und den
         Funkverlauf, damit alle Beteiligten denselben Stand sehen. Zugang hat nur, wer einen der Übungscodes kennt.
-        Die Daten einer Übung werden nach {{ STATUSSIM_RETENTION }} gelöscht. Im Browser merkt sich Status Sim
-        je Übungscode den verwendeten Namen, den Funkkanal und eine Ansichtseinstellung. Rechtsgrundlage ist unser
+        Die Daten einer Übung werden sieben Tage nach dem letzten Zugriff gelöscht. Im Browser merkt sich Status Sim
+        je Übungscode den verwendeten Namen, den Funkkanal und eine Ansichtseinstellung; Einträge, die sieben Tage
+        nicht genutzt wurden, entfernt es beim nächsten Speichern. Rechtsgrundlage ist unser
         berechtigtes Interesse, die gewünschte gemeinsame Übung bereitzustellen (Art. 6 Abs. 1 lit. f DSGVO).
       </p>
     </section>
