@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import {CodeDisplay, HelpSection, HelpPage, HelpTopic} from '@emberbox/ui'
+import {CodeDisplay, HelpIndex, HelpSection, HelpPage, HelpTopic} from '@emberbox/ui'
+
+/** Two made-up topics, to show the overview of a help center with subpages. */
+const TOPICS = [
+  {slug: 'anlegen', title: 'Übung anlegen', description: 'So entsteht eine Übung.'},
+  {slug: 'drucken', title: 'Drucken', description: 'So kommt der Zettel aufs Papier.'},
+]
 </script>
 
 <template>
   <HelpPage title="Hilfe" back="/pattern">
+    <HelpIndex :topics="TOPICS"/>
     <HelpSection title="Überblick">
       <HelpTopic :paragraphs="['So sieht eine Hilfe-Seite in jedem Werkzeug aus.', 'Abschnitte fassen Themen zusammen.']"/>
     </HelpSection>

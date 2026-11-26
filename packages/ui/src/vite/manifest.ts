@@ -9,6 +9,8 @@ export interface AppOptions {
     shortName?: string
     /** One sentence about what the app does. */
     description?: string
+    /** Where the installed app opens, `/` by default; a tool whose start page is public points it at the app. */
+    startUrl?: string
 }
 
 /** The colour of the app's title bar: the signal red of the logos. */
@@ -35,7 +37,7 @@ function manifest(app: AppOptions): string {
         short_name: app.shortName ?? app.name,
         description: app.description,
         lang: 'de',
-        start_url: '/',
+        start_url: app.startUrl ?? '/',
         scope: '/',
         display: 'standalone',
         theme_color: THEME_COLOR,

@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import {HelpPage, HelpSection, HelpTopic, usePage} from '@emberbox/ui'
+import {HelpIndex, HelpPage, usePage} from '@emberbox/ui'
+import {HELP_TOPICS} from './help-topics'
 
 usePage({title: 'Hilfe – Probe', description: 'Die Hilfe der Probe.', path: '/hilfe'})
 </script>
 
 <template>
   <HelpPage title="Probe-Hilfe">
-    <HelpSection title="Überblick">
-      <HelpTopic :paragraphs="['Ein Absatz der Probe-Hilfe.']"/>
-    </HelpSection>
+    <HelpIndex :topics="HELP_TOPICS"/>
   </HelpPage>
 </template>

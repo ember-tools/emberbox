@@ -1,4 +1,5 @@
 import {useHead, useSeoMeta} from '@unhead/vue'
+import {computed, type MaybeRefOrGetter, toValue} from 'vue'
 
 declare const __EMBERBOX_URL__: string | undefined
 declare const __EMBERBOX_IMAGE__: string | undefined
@@ -31,29 +32,34 @@ function absolute(path: string): string {
 
 /**
  * Sets a page's title, description, canonical address, OpenGraph and Twitter tags, `robots` and
- * structured data. Works the same in the browser and when prerendering.
+ * structured data. Works the same in the browser and when prerendering. Pass a getter when the page
+ * stays mounted while its content changes, such as one route for every help topic.
+ *
+ * @param meta what the page states, or a getter for it
  */
-export function usePage(meta: PageMeta): void {
-    const index = meta.index ?? true
-    const url = meta.path !== undefined && SITE_URL ? absolute(meta.path) : undefined
-    const imageSource = meta.image ?? DEFAULT_IMAGE
-    const image = imageSource && SITE_URL ? absolute(imageSource) : undefined
-    useHead({
-        title: meta.title,
-        link: url ? [{rel: 'canonical', href: url}] : [],
-        script: (meta.structuredData ?? []).map(data => ({type: 'application/ld+json', innerHTML: JSON.stringify(data)})),
+export function usePage(meta: MaybeRefOrGetter<PageMeta>): void {
+    const page = computed(() => toValue(meta))
+    const url = computed(() => (page.value.path !== undefined && SITE_URL ? absolute(page.value.path) : undefined))
+    const image = computed(() => {
+        const source = page.value.image ?? DEFAULT_IMAGE
+        return source && SITE_URL ? absolute(source) : undefined
     })
+    useHead(() => ({
+        title: page.value.title,
+        link: url.value ? [{rel: 'canonical', href: url.value}] : [],
+        script: (page.value.structuredData ?? []).map(data => ({type: 'application/ld+json', innerHTML: JSON.stringify(data)})),
+    }))
     useSeoMeta({
-        description: meta.description,
-        robots: index ? 'index, follow' : 'noindex, nofollow',
+        description: () => page.value.description,
+        robots: () => ((page.value.index ?? true) ? 'index, follow' : 'noindex, nofollow'),
         ogType: 'website',
         ogLocale: 'de_DE',
         ogSiteName: 'Emberbox',
-        ogTitle: meta.title,
-        ogDescription: meta.description,
-        ogUrl: url,
-        ogImage: image,
-        twitterCard: meta.image ? 'summary_large_image' : 'summary',
+        ogTitle: () => page.value.title,
+        ogDescription: () => page.value.description,
+        ogUrl: () => url.value,
+        ogImage: () => image.value,
+        twitterCard: () => (page.value.image ? 'summary_large_image' : 'summary'),
     })
 }
 
@@ -77,5 +83,33 @@ export function webApplicationData(info: WebApplicationInfo): object {
         inLanguage: 'de',
         isAccessibleForFree: true,
         offers: {'@type': 'Offer', price: '0', priceCurrency: 'EUR'},
+    }
+}
+
+/** One step of a breadcrumb trail. */
+export interface BreadcrumbStep {
+    /** What the step is called. */
+    name: string
+    /** The step's path below the tool's address. */
+    path: string
+}
+
+/**
+ * Structured data (JSON-LD) for a breadcrumb trail, such as tool, help and topic, which search engines
+ * show instead of the bare address.
+ *
+ * @param steps the trail from the tool's start page down to the current page
+ * @returns the `BreadcrumbList` for `usePage({structuredData})`
+ */
+export function breadcrumbData(steps: BreadcrumbStep[]): object {
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: steps.map((step, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: step.name,
+            item: SITE_URL ? `${SITE_URL}${step.path}` : undefined,
+        })),
     }
 }
