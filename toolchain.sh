@@ -29,6 +29,7 @@ Usage: ./toolchain.sh <command> [args...]
   install-clean   npm ci
   ui-build        Build the Vite plugin of @emberbox/ui
   ui-typecheck    vue-tsc for @emberbox/ui
+  ui-test         vitest for @emberbox/ui
   ui-icons        Check that OWN_ICONS lists exactly the icons the lib components use
   ui-logos        Regenerate the logo SVGs and PNGs in packages/ui/logos
   ui-probe        Pack @emberbox/ui, install it into the empty app in probe/, build, prerender and
@@ -53,6 +54,7 @@ case "$command" in
     install-clean) run npm ci "$@" ;;
     ui-build) run npm run -w @emberbox/ui build ;;
     ui-typecheck) run npm run -w @emberbox/ui typecheck ;;
+    ui-test) run npm run -w @emberbox/ui test ;;
     ui-icons) run npm run -w @emberbox/ui icons ;;
     ui-logos) run npm run -w @emberbox/ui logos ;;
     lint-probe)
@@ -100,6 +102,7 @@ case "$command" in
     verify)
         "$0" ui-build
         "$0" ui-typecheck
+        "$0" ui-test
         "$0" ui-icons
         "$0" lint-test
         "$0" lint

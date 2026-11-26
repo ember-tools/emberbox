@@ -2,13 +2,23 @@
 import {CalendarDate} from '@internationalized/date'
 import {
   AppFooter, AppHeader, CodeDisplay, CollapsibleSection, ComboboxField, DateTimeField, HelpSection, HelpTopic,
-  NewBuildBanner, TextAreaField, TextField, YesNoField, useConfirm, usePolling,
+  MARK_KINDS, NewBuildBanner, TacticalSymbol, TextAreaField, TextField, YesNoField, markSymbolTree, unitSymbolTree,
+  useConfirm, usePolling,
 } from '@emberbox/ui'
+import type {SymbolSpec} from '@emberbox/ui'
 import type {DropdownMenuItem, TableColumn, TabsItem, AccordionItem, StepperItem} from '@nuxt/ui'
 import {ref, shallowRef} from 'vue'
 
 const colors = ['primary', 'signal', 'neutral', 'success', 'info', 'warning', 'error'] as const
 const variants = ['solid', 'outline', 'soft', 'subtle', 'ghost', 'link'] as const
+const symbolUnits = [
+  {shape: 'vehicle', organisation: 'fire', text: 'HLF 20', size: 'group'},
+  {shape: 'vehicle', organisation: 'medical', text: 'RTW'},
+  {shape: 'container', organisation: 'fire', text: 'AB-Schlauch'},
+  {shape: 'trailer', organisation: 'fire', text: 'TS'},
+  {shape: 'boat', organisation: 'fire', text: 'MZB'},
+  {shape: 'unit', organisation: 'fire', text: 'AT', size: 'squad'},
+] satisfies SymbolSpec[]
 
 const text = ref('')
 const count = ref(3)
@@ -217,6 +227,16 @@ const columns: TableColumn<Unit>[] = [
         </template>
         <p class="m-0 text-muted">Der Zustand bleibt beim Neuladen erhalten.</p>
       </CollapsibleSection>
+    </section>
+
+    <section class="flex flex-col gap-3">
+      <h2 class="eyebrow">Taktische Zeichen</h2>
+      <div class="flex flex-wrap items-end gap-3">
+        <TacticalSymbol v-for="unit in symbolUnits" :key="unit.text" :symbol="unitSymbolTree(unit)" :width="64"/>
+      </div>
+      <div class="flex flex-wrap items-end gap-3">
+        <TacticalSymbol v-for="kind in MARK_KINDS" :key="kind" :symbol="markSymbolTree(kind)" :width="48"/>
+      </div>
     </section>
 
     <section class="flex flex-col gap-3">

@@ -26,6 +26,12 @@ export {default as ComboboxField} from './components/ComboboxField.vue'
 export {default as YesNoField} from './components/YesNoField.vue'
 export {default as DateTimeField} from './components/DateTimeField.vue'
 export {default as CollapsibleSection} from './components/CollapsibleSection.vue'
+export {default as TacticalSymbol} from './components/TacticalSymbol.vue'
+export {
+    INCIDENT_MARK_KINDS, MARK_KINDS, SYMBOL_HEIGHT, SYMBOL_WIDTH, WATER_SUPPLY_MARK_KINDS, escapeSvg, markSymbol,
+    markSymbolTree, unitSymbol, unitSymbolTree,
+    type MarkKind, type Organisation, type SvgElement, type SymbolShape, type SymbolSpec, type UnitSize,
+} from './symbols/tactical'
 
 /**
  * Vue plugin that installs Nuxt UI in the Emberbox style. Icons come only from the bundled set; a
