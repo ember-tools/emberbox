@@ -155,8 +155,10 @@ emberbox({prerender: {entry: 'src/prerender.ts', paths: ['/', ...helpPaths(HELP_
 
 - The overview renders `<HelpPage title="Hilfe"><HelpIndex :topics="HELP_TOPICS"/></HelpPage>`.
 - A topic page renders `<HelpPage :title :topics="HELP_TOPICS" :current="slug">`: it lists the other topics,
-  leads back to the overview and on to the next topic. Its `usePage` takes `breadcrumbData([...])` for the trail
-  tool, Hilfe, topic.
+  leads back to the overview and on to the next topic. Its content goes into `HelpSection`s. One without a
+  `title` is only the frame, so a topic page does not repeat its own heading; put only untitled `HelpTopic`s
+  into it and give each titled part its own titled section, so headings go h1, h2, h3. Its `usePage` takes
+  `breadcrumbData([...])` for the trail tool, Hilfe, topic.
 - `helpPath(slug)` builds the addresses.
 - Topic pages usually share one route `/hilfe/:slug`, so the component stays mounted from topic to topic: pass
   `usePage` a getter (`usePage(() => ({...}))`) so title, canonical and breadcrumb follow, send unknown slugs
