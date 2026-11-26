@@ -19,10 +19,6 @@ export interface LegalDetails {
 /** Where the servers run. */
 export const HOSTER = 'der Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, in Rechenzentren in Deutschland'
 
-/** How long Status Sim keeps an exercise's data. */
-// TODO: fill in once Status Sim deletes exercises after a fixed period
-export const STATUSSIM_RETENTION = 'TODO'
-
 /** Accepts the parsed file only when every field the pages show is present and of the right kind. */
 function asLegalDetails(value: unknown): LegalDetails | null {
     const details = value as Partial<LegalDetails> | null
