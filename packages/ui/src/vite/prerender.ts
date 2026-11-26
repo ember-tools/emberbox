@@ -29,6 +29,23 @@ function sitemap(url: string, paths: string[]): string {
 }
 
 /**
+ * Vue's compile-time feature flags with their production values. Dependencies that Node loads in
+ * their bundler build, such as vue-i18n, read them as globals: a bundler replaces them, Node does not.
+ * The values are the defaults of `@vitejs/plugin-vue`.
+ */
+const VUE_FLAGS = {
+    __VUE_OPTIONS_API__: true,
+    __VUE_PROD_DEVTOOLS__: false,
+    __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
+}
+
+/** Defines Vue's feature flags as globals where nothing has defined them yet, as Vue's own bundler build does. */
+function defineVueFlags(): void {
+    const scope = globalThis as Record<string, unknown>
+    for (const [flag, value] of Object.entries(VUE_FLAGS)) scope[flag] ??= value
+}
+
+/**
  * Prerenders the public pages once the client build is written. It builds the entry as an SSR
  * bundle, calls `render` for every path with the built `index.html` as template and writes the
  * result to `pages/<path>/index.html`. `index.html` itself stays the empty shell for all other
@@ -56,6 +73,7 @@ export function prerenderPlugin(options: PrerenderOptions, url: string): Plugin 
             const name = basename(options.entry, extname(options.entry))
             const bundle = readdirSync(ssrOutDir).find(candidate => /^(.+)\.m?js$/.exec(candidate)?.[1] === name)
             if (!bundle) throw new Error(`The SSR bundle of ${options.entry} is missing in ${ssrOutDir}.`)
+            defineVueFlags()
             const entry = await import(pathToFileURL(join(ssrOutDir, bundle)).href) as PrerenderEntry
             const template = readFileSync(join(outDir, 'index.html'), 'utf8')
             for (const path of options.paths) {
